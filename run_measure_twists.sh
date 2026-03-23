@@ -10,11 +10,13 @@ INPUT_SUITE_OVERRIDE="${INPUT_SUITE:-stale}"
 LENGTH_FACTOR_OVERRIDE="${LENGTH_FACTOR:-}"
 STREAM_BYTES_OVERRIDE="${STREAM_BYTES:-}"
 TRIAL_COUNT_OVERRIDE="${TRIAL_COUNT:-}"
-CYCLE_BLOCK_COUNT_OVERRIDE="${CYCLE_BLOCK_COUNT:-}"
 SAMPLE_WINDOWS_OVERRIDE="${SAMPLE_WINDOWS:-}"
 SIGNATURE_BYTES_OVERRIDE="${SIGNATURE_BYTES:-}"
 AVALANCHE_BLOCKS_OVERRIDE="${AVALANCHE_BLOCKS:-}"
 AVALANCHE_TRIALS_OVERRIDE="${AVALANCHE_TRIALS:-}"
+BIC_SAMPLE_BITS_OVERRIDE="${BIC_SAMPLE_BITS:-}"
+SECOND_ORDER_TRIALS_OVERRIDE="${SECOND_ORDER_TRIALS:-}"
+CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE="${CROSS_INPUT_SIGNATURE_BYTES:-}"
 LONG_REPEAT_BYTES_OVERRIDE="${LONG_REPEAT_BYTES:-}"
 LONG_REPEAT_TOP_OVERRIDE="${LONG_REPEAT_TOP:-}"
 LONG_REPEAT_WINDOW_A_OVERRIDE="${LONG_REPEAT_WINDOW_A:-}"
@@ -118,7 +120,10 @@ PY
 clang++ -std=c++20 -O2 -I./src \
   ./src/TwistCandidateHarness.cpp \
   ./src/BaselineCandidates.cpp \
+  ./src/PasswordExpander.cpp \
   ./src/LightningMatrix.cpp \
+  ./src/HurricaneMatrix.cpp \
+  ./src/TyphoonMatrix.cpp \
   "./${INPUT_CPP}" \
   ./references/AESCounter.cpp \
   ./references/ARIA256Counter.cpp \
@@ -144,10 +149,6 @@ if [[ -n "${TRIAL_COUNT_OVERRIDE}" ]]; then
   HARNESS_ARGS+=(--trial-count "${TRIAL_COUNT_OVERRIDE}")
 fi
 
-if [[ -n "${CYCLE_BLOCK_COUNT_OVERRIDE}" ]]; then
-  HARNESS_ARGS+=(--cycle-block-count "${CYCLE_BLOCK_COUNT_OVERRIDE}")
-fi
-
 if [[ -n "${SAMPLE_WINDOWS_OVERRIDE}" ]]; then
   HARNESS_ARGS+=(--sample-windows "${SAMPLE_WINDOWS_OVERRIDE}")
 fi
@@ -162,6 +163,18 @@ fi
 
 if [[ -n "${AVALANCHE_TRIALS_OVERRIDE}" ]]; then
   HARNESS_ARGS+=(--avalanche-trials "${AVALANCHE_TRIALS_OVERRIDE}")
+fi
+
+if [[ -n "${BIC_SAMPLE_BITS_OVERRIDE}" ]]; then
+  HARNESS_ARGS+=(--bic-sample-bits "${BIC_SAMPLE_BITS_OVERRIDE}")
+fi
+
+if [[ -n "${SECOND_ORDER_TRIALS_OVERRIDE}" ]]; then
+  HARNESS_ARGS+=(--second-order-trials "${SECOND_ORDER_TRIALS_OVERRIDE}")
+fi
+
+if [[ -n "${CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE}" ]]; then
+  HARNESS_ARGS+=(--cross-input-signature-bytes "${CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE}")
 fi
 
 if [[ -n "${LONG_REPEAT_BYTES_OVERRIDE}" ]]; then

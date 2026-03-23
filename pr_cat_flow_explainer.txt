@@ -1,0 +1,210 @@
+PractRand Flow Explainer
+========================
+
+This file is the short "in case I forget the steps" guide for running
+PractRand as the first real filter over Twist candidates.
+
+
+Big Idea
+--------
+
+Use PractRand, not NIST, as the first meaningful gate.
+
+Why:
+- PractRand is running correctly in this project now.
+- NIST STS is unstable here and sometimes crashes before producing a final report.
+- PractRand is better suited for long-stream testing anyway.
+
+Important rule of thumb:
+- tiny streams are only smoke tests
+- 64 MiB is the first meaningful PractRand size for this project
+
+
+Meaningful Size
+---------------
+
+The first real PractRand gate should use:
+
+- 64 MiB
+
+Why 64 MiB matters:
+- it is large enough that startup behavior stops dominating
+- it lets the key stack, mask stack, breakers, and round evolution actually play out
+- it covers many thousands of 7680-byte twister windows
+
+Use smaller sizes only for:
+- compile checks
+- pipe checks
+- one-off debugging
+
+
+One Candidate
+-------------
+
+Run one candidate directly through PractRand:
+
+```bash
+INPUT_CPP=generated/twist_candidates_generated_verbose.cpp \
+CANDIDATE_ID=1 \
+PASSWORD_TEXT=cat \
+STREAM_MIB=64 \
+bash ./run_registered_candidate_practrand_once.sh
+```
+
+This writes:
+- a raw byte stream if requested
+- a PractRand report
+- a score summary if requested
+
+
+Candidate Folder Filter
+-----------------------
+
+This is the normal folder-to-folder filter flow.
+
+Example:
+
+```bash
+./execute_practrand_filter.sh \
+  /Users/magneto/Desktop/Codex\ Playground/Twist/candidates \
+  /Users/magneto/Desktop/Codex\ Playground/Twist/candidates_filtered_practrand_cat_064MB \
+  cat \
+  64mb \
+  0 \
+  0 \
+  0
+```
+
+Arguments:
+- input candidates dir
+- output dir
+- password text
+- size
+- max_fail
+- max_very_suspicious
+- max_suspicious
+
+Optional trailing thresholds:
+- max_mildly_suspicious
+- max_unusual
+
+The strict version above means:
+- 0 `FAIL`
+- 0 `VERY SUSPICIOUS`
+- 0 `suspicious`
+
+
+Outputs
+-------
+
+Each PractRand filter stage writes:
+- `summary_<password>_<size>.csv`
+- `passed_candidates.txt`
+- `failed_candidates.txt`
+
+Passing candidates are copied into the output folder with:
+- `code.cpp`
+- `metadata.json`
+- stream file
+- PractRand score/report text
+
+
+Alphabet Sweep
+--------------
+
+A good first ladder idea is the whole lowercase alphabet as 1-letter passwords:
+
+- `a`
+- `b`
+- `c`
+- ...
+- `z`
+
+Each one at:
+- 64 MiB
+
+Suggested pattern:
+
+```bash
+./execute_practrand_filter.sh candidates candidates_filtered_practrand_a_064MB a 64mb 0 0 0
+./execute_practrand_filter.sh candidates_filtered_practrand_a_064MB candidates_filtered_practrand_b_064MB b 64mb 0 0 0
+./execute_practrand_filter.sh candidates_filtered_practrand_b_064MB candidates_filtered_practrand_c_064MB c 64mb 0 0 0
+```
+
+And so on through `z`.
+
+This is intentionally harsh.
+
+The point is:
+- not to prove security
+- but to find candidates that survive many simple, structured seeds
+
+
+Timing Expectation
+------------------
+
+At 64 MiB, expect each candidate test to take real time.
+
+Your current mental model is good:
+- a few minutes per candidate is plausible
+
+The actual time depends on:
+- candidate complexity
+- whether the shard stream binary is already compiled
+- machine load
+
+Important:
+- the registered stream binary is compiled once per shard/source file
+- it is not recompiling every candidate
+
+
+Recommended Real Flow
+---------------------
+
+1. Generate candidate folders.
+
+```bash
+python3 generate.py --count 100000 --seed 911 --shard-size 500 --generated-dir generated --candidates-dir candidates --clean-candidates
+```
+
+2. Run PractRand first gate on `a` at `64mb`.
+
+```bash
+./execute_practrand_filter.sh candidates candidates_filtered_practrand_a_064MB a 64mb 0 0 0
+```
+
+3. Feed survivors into `b`, then `c`, then keep going through the alphabet.
+
+4. Only after surviving PractRand stages should candidates go to heavier in-house scoring.
+
+
+How Strict Should The Gate Be?
+------------------------------
+
+Suggested first real gate:
+- `max_fail = 0`
+- `max_very_suspicious = 0`
+- `max_suspicious = 0`
+
+Looser debugging gate:
+- `max_fail = 0`
+- `max_very_suspicious = 0`
+- `max_suspicious = 1`
+
+Do not treat:
+- `mildly suspicious`
+- `unusual`
+
+as hard failures unless you want a very aggressive cut.
+
+
+Quick Memory Version
+--------------------
+
+If you forget everything else:
+
+1. PractRand first, not NIST.
+2. Use 64 MiB as the smallest real size.
+3. Sweep simple passwords like `a` through `z`.
+4. Keep only candidates with no `FAIL`, no `VERY SUSPICIOUS`, and no `suspicious`.
+5. Only score survivors further.

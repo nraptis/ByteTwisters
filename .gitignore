@@ -1,0 +1,6 @@
+build/
+generated/*.cpp
+generated/*.json
+generated/*.csv
+generated/*.txt
+generated/*.html

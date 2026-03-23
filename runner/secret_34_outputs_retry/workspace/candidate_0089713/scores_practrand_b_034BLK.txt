@@ -1,0 +1,30 @@
+input_cpp=/Users/magneto/Desktop/Codex Playground/Twist/runner/consolidated_winners/shards_cpp/shard_0001.cpp
+candidate_id=89714
+password_text=b
+stream_bytes=261120
+stream_file=secret_34_outputs_retry/workspace/.practrand_stage/candidate_0089713/b_byte_stream_034BLK.bin
+practrand_bin=/Users/magneto/Desktop/Codex Playground/Twist/build/practrand/RNG_test
+report_file=secret_34_outputs_retry/workspace/.practrand_stage/candidate_0089713/practrand_reports/candidate_0089713_b_034BLK/practrand_output.txt
+fail=4
+very_suspicious=0
+suspicious=0
+mildly_suspicious=1
+unusual=0
+normalish=0
+normal=41
+total_results=46
+
+RNG_test using PractRand version 0.96
+RNG = RNG_stdin8, seed = unknown
+test set = core, folding = standard (8 bit)
+
+rng=RNG_stdin8, seed=unknown
+length= 255.000 kilobytes (2^17.994 bytes), time= 0.0 seconds
+  Test Name                         Raw       Processed     Evaluation       
+  Gap-16:A                          R= +15.2  p =  5.9e-12    FAIL           
+  Gap-16:B                          R= +36.2  p =  3.6e-28    FAIL !!!       
+  Gap-16:C                          R= +11.9  p~=1-1.3e-4   mildly suspicious
+  FPF/16:(1,14-6)                   R= +66.3  p =  8.6e-51    FAIL !!!!      
+  FPF/16:all                        R= +35.2  p =  1.7e-28    FAIL !!!       
+  ...and 41 test result(s) without anomalies
+

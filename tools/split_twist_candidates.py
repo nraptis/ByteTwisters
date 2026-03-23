@@ -112,7 +112,10 @@ def assemble_shards(output_dir: Path, temp_dir: Path, candidate_count: int, shar
       registry = registry_path.read_text(encoding="utf-8") if registry_path.exists() else ""
 
       shard_source = (
+          '#include "HurricaneMatrix.hpp"\n'
           '#include "LightningMatrix.hpp"\n'
+          '#include "TwistBreakers.hpp"\n'
+          '#include "TyphoonMatrix.hpp"\n'
           '#include "TwistTypes.hpp"\n\n'
           "namespace twist {\n\n"
           "// Generated shard from tools/split_twist_candidates.py\n"

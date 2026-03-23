@@ -1,13 +1,13 @@
 # Twist Candidate Pipeline
 
-This repo generates and grades two-phase byte twisters that are shaped for AArch64 NEON.
+This repo generates and grades byte twisters built from scalar byte loops plus 16-byte matrix breaker passes.
 
 Each generated twister has exactly:
 
 - `phase 1`: read from `source`, write to `worker`
 - `phase 2`: read from `source` and `worker`, write to `dest`
 
-The hot path is byte-oriented but emitted as NEON vector code over `uint8x16_t`.
+The hot path is byte-oriented and operates over the full `PASSWORD_EXPANDED_SIZE` window with simple scalar arithmetic plus 16-byte breaker blocks.
 
 The pipeline now emits two generated source views:
 
@@ -95,19 +95,19 @@ These are the operations the generator can emit today.
 ### Core Binary Byte Ops
 
 - `add`
-  - NEON mapping: `vaddq_u8`
+  - byte-wise addition
 - `sub`
-  - NEON mapping: `vsubq_u8`
+  - byte-wise subtraction
 - `mul`
-  - NEON mapping: `vmulq_u8`
+  - byte-wise multiply with `0xff` truncation
 - `xor`
-  - NEON mapping: `veorq_u8`
+  - byte-wise xor
 - `and`
-  - NEON mapping: `vandq_u8`
+  - byte-wise and
 - `or`
-  - NEON mapping: `vorrq_u8`
+  - byte-wise or
 
-These are lane-wise byte operations across a `uint8x16_t`.
+These are byte-wise operations used inside the generated scalar loops.
 
 Current default search policy:
 
@@ -131,23 +131,23 @@ Reason:
 - `swap_nibbles`
   - swaps high/low nibble in each byte
 - `byte_lr8_left`
-  - rotates byte positions inside each 8-byte half of the 16-byte NEON register
+  - rotates byte positions inside each 8-byte half of a 16-byte block
 - `byte_lr8_right`
   - same, opposite direction
 
 Notes:
 
-- `swap_nibbles` is a very good NEON-friendly transform.
+- `swap_nibbles` is still a good low-cost transform.
 - `byte_lr8_*` is useful because it breaks lane stability without needing scalar logic.
-- wrapping loads are handled by `LoadVecWrapped`, so the generator does not need separate front/back array parameters.
+- wrapping loads are handled by `LoadBlock16Wrapped`, so the generator does not need separate front/back array parameters.
 - the readable verbose file names indices and intermediate values explicitly so you can inspect exactly what the harness is running.
 
 ## Other Potential Operations That Could Work
 
-These are good future candidates because they still map cleanly to NEON byte semantics.
+These are good future candidates because they still fit the simple byte-wise model.
 
 - `min` / `max`
-  - NEON-friendly and cheap
+  - cheap and simple
 - saturating `add` / saturating `sub`
   - useful if you want stronger nonlinearity without branches
 - byte-wise `select`
@@ -163,11 +163,11 @@ These are good future candidates because they still map cleanly to NEON byte sem
 - table-driven fixed shuffles
   - acceptable if the table is static and small
 
-Good rule: prefer operations that stay in vector registers and avoid scalar fallback in the hot loop.
+Good rule: prefer operations that stay simple in the hot loop and avoid branchy or table-heavy fallback logic.
 
 ## Operations To Avoid
 
-These are poor fits because they are slow, awkward, or work against the NEON-first design.
+These are poor fits because they are slow, awkward, or work against the simple byte-loop design.
 
 - integer division
   - very slow and not a natural byte-vector primitive
@@ -175,10 +175,8 @@ These are poor fits because they are slow, awkward, or work against the NEON-fir
   - expensive; wrapping should stay in load helpers, not inside the math
 - data-dependent branches
   - harms throughput and makes SIMD execution uneven
-- scalar per-byte loops inside the twister body
-  - defeats the purpose of the NEON layout
 - arbitrary gather/scatter
-  - NEON does not provide general byte gather loads
+  - expensive and hard to keep predictable
 - large data-dependent table lookups
   - bad for cache behavior and awkward for SIMD
 - cross-register variable shuffles with complex control
@@ -264,7 +262,7 @@ The manifest now records:
 
 The HTML report is the easiest place to inspect the ranked candidates.
 The verbose `.cpp` and `.txt` files are the easiest way to inspect the exact generated loop logic.
-The CSV and summary now also include `exact_repeat_64_*` and `exact_repeat_128_*` fields.
+The CSV and summary now also include generic long-repeat scan fields such as `long_repeat_match_*`.
 
 ## Run
 

@@ -1,0 +1,301 @@
+NIST Cat Flow Explainer
+=======================
+
+This file describes the current folder-based candidate generation and staged NIST filtering flow.
+
+Core idea
+---------
+
+1. Generate a large candidate set into `generated/candidates/...`
+2. Run a staged NIST filter over those folders
+3. Keep only passing candidate folders at each stage
+4. Feed the surviving folders into the next stage
+
+
+1.) Generate 100,000 candidates
+-------------------------------
+
+Run this from the Twist root:
+
+python3 generate.py --count 200000 --seed 911 --shard-size 500 --clean-candidates
+
+What this makes:
+
+- `generated/twist_candidates_generated_verbose.cpp`
+- `generated/shards_cpp/...`
+- `generated/shards_index.json`
+- `generated/candidates/candidate_00000`
+- `generated/candidates/candidate_00001`
+- ...
+
+Each candidate folder contains:
+
+- `code.cpp`
+- `metadata.json`
+
+
+2.) Run the cat100 stage into filtered_cat_100
+----------------------------------------------
+
+Run:
+
+bash ./execute_nist_filter.sh generated/candidates generated/filtered_cat_100 cat 100
+
+What this does:
+
+- reads candidate folders from `generated/candidates`
+- generates a `100 MiB` byte stream for password `cat`
+- runs NIST STS
+- copies only passing candidate folders into `generated/filtered_cat_100`
+
+Output files:
+
+- `generated/filtered_cat_100/summary_cat_100MB.csv`
+- `generated/filtered_cat_100/passed_candidates.txt`
+- `generated/filtered_cat_100/failed_candidates.txt`
+
+Passing candidate folders in `generated/filtered_cat_100/...` include:
+
+- `code.cpp`
+- `metadata.json`
+- `cat_byte_stream_100MB.bin`
+- `scores_cat_100MB.txt`
+- `nist_cat_100MB/...`
+
+
+3.) Run filtered_cat_100 through dog200 into filtered_dog_200
+--------------------------------------------------------------
+
+Run:
+
+bash ./execute_nist_filter.sh generated/filtered_cat_100 generated/filtered_dog_200 dog 200
+
+Output files:
+
+- `generated/filtered_dog_200/summary_dog_200MB.csv`
+- `generated/filtered_dog_200/passed_candidates.txt`
+- `generated/filtered_dog_200/failed_candidates.txt`
+
+Passing candidate folders in `generated/filtered_dog_200/...` include:
+
+- `code.cpp`
+- `metadata.json`
+- `dog_byte_stream_200MB.bin`
+- `scores_dog_200MB.txt`
+- `nist_dog_200MB/...`
+
+
+4.) Run filtered_dog_200 through dragon500 into filtered_dragon_500
+-------------------------------------------------------------------
+
+Run:
+
+bash ./execute_nist_filter.sh generated/filtered_dog_200 generated/filtered_dragon_500 dragon 500
+
+Output files:
+
+- `generated/filtered_dragon_500/summary_dragon_500MB.csv`
+- `generated/filtered_dragon_500/passed_candidates.txt`
+- `generated/filtered_dragon_500/failed_candidates.txt`
+
+Passing candidate folders in `generated/filtered_dragon_500/...` include:
+
+- `code.cpp`
+- `metadata.json`
+- `dragon_byte_stream_500MB.bin`
+- `scores_dragon_500MB.txt`
+- `nist_dragon_500MB/...`
+
+
+Where to get the pass/fail breakdown
+------------------------------------
+
+Each stage writes a summary CSV with these columns:
+
+- `folder_name`
+- `candidate_id`
+- `function_name`
+- `pass_rows`
+- `fail_rows`
+- `total_rows`
+- `score_file`
+- `stream_file`
+- `final_report`
+
+Examples:
+
+- `generated/filtered_cat_100/summary_cat_100MB.csv`
+- `generated/filtered_dog_200/summary_dog_200MB.csv`
+- `generated/filtered_dragon_500/summary_dragon_500MB.csv`
+
+The key field for breakdowns is:
+
+- `fail_rows`
+
+This is the number of NIST result rows whose p-value fell below `0.01`.
+
+
+How to print a breakdown by number of failed rows
+-------------------------------------------------
+
+Example for the cat100 stage:
+
+python3 - <<'PY'
+import csv
+from collections import Counter
+
+path = "generated/filtered_cat_100/summary_cat_100MB.csv"
+counter = Counter()
+
+with open(path, newline="", encoding="utf-8") as handle:
+    reader = csv.DictReader(handle)
+    for row in reader:
+        counter[int(row["fail_rows"])] += 1
+
+for fail_rows in sorted(counter):
+    print(f"fail_rows={fail_rows}, candidates={counter[fail_rows]}")
+PY
+
+You can change the `path` variable to:
+
+- `generated/filtered_dog_200/summary_dog_200MB.csv`
+- `generated/filtered_dragon_500/summary_dragon_500MB.csv`
+
+
+How to make a quick pass/fail graph
+-----------------------------------
+
+If you want a simple bar chart of the fail-count distribution:
+
+python3 - <<'PY'
+import csv
+from collections import Counter
+import matplotlib.pyplot as plt
+
+path = "generated/filtered_cat_100/summary_cat_100MB.csv"
+counter = Counter()
+
+with open(path, newline="", encoding="utf-8") as handle:
+    reader = csv.DictReader(handle)
+    for row in reader:
+        counter[int(row["fail_rows"])] += 1
+
+x = sorted(counter)
+y = [counter[value] for value in x]
+
+plt.figure(figsize=(10, 5))
+plt.bar(x, y)
+plt.xlabel("NIST fail_rows")
+plt.ylabel("Candidate count")
+plt.title("Cat 100MB NIST fail distribution")
+plt.tight_layout()
+plt.show()
+PY
+
+If `matplotlib` is not installed, the text histogram command above is the simplest fallback.
+
+
+Suggested real flow
+-------------------
+
+1. Generate:
+
+python3 generate.py --count 100000 --seed 911 --shard-size 500 --clean-candidates
+
+2. Cat stage:
+
+bash ./execute_nist_filter.sh generated/candidates generated/filtered_cat_100 cat 100
+
+3. Dog stage:
+
+bash ./execute_nist_filter.sh generated/filtered_cat_100 generated/filtered_dog_200 dog 200
+
+4. Dragon stage:
+
+bash ./execute_nist_filter.sh generated/filtered_dog_200 generated/filtered_dragon_500 dragon 500
+
+5. Use each stage summary CSV to inspect:
+
+- total passers
+- total fails
+- distribution by `fail_rows`
+- which candidates are near-misses vs obvious failures
+
+
+Shortcut ladder runner
+----------------------
+
+There is also a convenience runner for the staged flow:
+
+bash ./run_nist_stage_ladder.sh
+
+By default it runs this twister-aligned early ladder only:
+
+- `a:1blk:24`
+- `b:1blk:24`
+- `c:1blk:24`
+- `d:1blk:24`
+- `e:1blk:24`
+- `f:1blk:24`
+- `g:1blk:24`
+- `ape:2blk:24`
+- `bat:2blk:24`
+- `cat:2blk:24`
+- `dog:2blk:24`
+- `elk:2blk:24`
+- `fat:2blk:24`
+- `gun:2blk:24`
+- `aces:4blk:12`
+- `bear:4blk:12`
+- `camp:4blk:12`
+- `dark:4blk:12`
+- `eats:4blk:12`
+- `fang:4blk:12`
+- `goat:4blk:12`
+- `amped:8blk:7`
+- `barbs:8blk:7`
+- `champ:8blk:7`
+- `deals:8blk:7`
+- `ember:8blk:7`
+- `foals:8blk:7`
+- `goose:8blk:7`
+
+Format:
+
+- `password:size:max_fail_rows`
+
+Where:
+
+- `1blk` means one `PASSWORD_EXPANDED_SIZE` window
+- `2blk` means two windows
+- `4blk` means four windows
+- `8blk` means eight windows
+
+The early ladder no longer requires `0` NIST failures to survive.
+Instead, each stage keeps candidates with `fail_rows <= max_fail_rows`.
+
+It starts from:
+
+- `{project_root}/candidates`
+
+And writes:
+
+- `{project_root}/candidates_filtered_cat_001`
+- `{project_root}/candidates_filtered_dog_001`
+- `{project_root}/candidates_filtered_cow_001`
+- ...
+
+Each stage also gets:
+
+- `failure_histogram_<password>_<size>MB.txt`
+- `failure_histogram_<password>_<size>MB.csv`
+
+The histogram buckets are:
+
+- `0 fails`
+- `1 fail`
+- `2-3 fails`
+- `4-7 fails`
+- `8+ fails`
+
+`1 fail` is included explicitly so no candidates are lost between buckets.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import html
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -21,7 +22,124 @@ def parse_float(value: str) -> float:
     return float(value) if value.strip() else 0.0
 
 
-def load_rows(input_dir: Path) -> tuple[list[str], list[dict[str, str]]]:
+def clamp(value: float, low: float, high: float) -> float:
+    return max(low, min(high, value))
+
+
+def compute_grade_info(composite_score: float) -> tuple[str, int]:
+    if composite_score >= 97.0:
+        return "A+", 15
+    if composite_score >= 93.0:
+        return "A", 14
+    if composite_score >= 90.0:
+        return "A-", 13
+    if composite_score >= 87.0:
+        return "B+", 12
+    if composite_score >= 83.0:
+        return "B", 11
+    if composite_score >= 80.0:
+        return "B-", 10
+    if composite_score >= 77.0:
+        return "C+", 9
+    if composite_score >= 73.0:
+        return "C", 8
+    if composite_score >= 70.0:
+        return "C-", 7
+    if composite_score >= 65.0:
+        return "D+", 6
+    if composite_score >= 60.0:
+        return "D", 5
+    if composite_score >= 50.0:
+        return "D-", 4
+    return "F", 0
+
+
+def load_category_weights(knobs_path: Path) -> list[tuple[str, int]]:
+    text = knobs_path.read_text(encoding="utf-8")
+    names = [
+        ("aes_score", "kTrialCountAES"),
+        ("chacha_score", "kTrialCountChaCha"),
+        ("zeros_score", "kTrialCountZeros"),
+        ("ones_score", "kTrialCountOnes"),
+        ("predictable_a_score", "kTrialCountPredictableA"),
+        ("predictable_b_score", "kTrialCountPredictableB"),
+        ("predictable_c_score", "kTrialCountPredictableC"),
+    ]
+    weights: list[tuple[str, int]] = []
+    for field_name, knob_name in names:
+        match = re.search(rf"inline constexpr std::size_t {re.escape(knob_name)} = (\d+);", text)
+        weights.append((field_name, int(match.group(1)) if match else 0))
+    return weights
+
+
+def rerank_row(row: dict[str, str], category_weights: list[tuple[str, int]]) -> None:
+    structural_composite = (
+        parse_float(row.get("repeat_score", "0")) * 0.12
+        + parse_float(row.get("cycle_score", "0")) * 0.10
+        + parse_float(row.get("uniformity_score", "0")) * 0.12
+        + parse_float(row.get("predictability_score", "0")) * 0.10
+        + parse_float(row.get("avalanche_score", "0")) * 0.16
+        + parse_float(row.get("completeness_score", "0")) * 0.10
+        + parse_float(row.get("bic_score", "0")) * 0.10
+        + parse_float(row.get("bit_inclusion_score", "0")) * 0.08
+        + parse_float(row.get("nonlinearity_score", "0")) * 0.08
+        + parse_float(row.get("cross_input_collision_score", "0")) * 0.10
+        + parse_float(row.get("distinctness_score", "0")) * 0.04
+    )
+
+    present_scores: list[float] = []
+    weighted_total = 0.0
+    weighted_count = 0
+    weakest_field = ""
+    weakest_score = float("inf")
+    for field_name, weight in category_weights:
+        if weight <= 0:
+            continue
+        value = parse_float(row.get(field_name, ""))
+        present_scores.append(value)
+        weighted_total += value * weight
+        weighted_count += weight
+        if value < weakest_score:
+            weakest_score = value
+            weakest_field = field_name
+
+    composite = structural_composite
+    if weighted_count > 0 and present_scores:
+        present_scores.sort()
+        lower_tail_count = min(2, len(present_scores))
+        lower_tail_score = sum(present_scores[:lower_tail_count]) / float(lower_tail_count)
+        average_category_score = weighted_total / float(weighted_count)
+        composite = (
+            structural_composite * 0.20
+            + average_category_score * 0.35
+            + lower_tail_score * 0.25
+            + weakest_score * 0.20
+        )
+
+    if parse_bool(row.get("rejected", "false")):
+        composite = clamp(composite - 25.0, 0.0, 100.0)
+    else:
+        composite = clamp(composite, 0.0, 100.0)
+
+    grade, grade_rank = compute_grade_info(composite)
+    row["composite_score"] = f"{composite:.3f}"
+    row["grade"] = grade
+    row["grade_rank"] = str(grade_rank)
+
+    if weakest_field:
+        field_to_label = {
+            "aes_score": "aes",
+            "chacha_score": "chacha",
+            "zeros_score": "zeros",
+            "ones_score": "ones",
+            "predictable_a_score": "predictable_a",
+            "predictable_b_score": "predictable_b",
+            "predictable_c_score": "predictable_c",
+        }
+        row["failure_reason"] = field_to_label.get(weakest_field, row.get("failure_reason", ""))
+
+
+def load_rows(input_dir: Path, category_weights: list[tuple[str, int]]) -> tuple[list[str], list[dict[str, str]]]:
     header: list[str] | None = None
     rows_by_id: dict[int, dict[str, str]] = {}
     for csv_path in sorted(input_dir.rglob("twist_candidate_scores.csv")):
@@ -32,6 +150,7 @@ def load_rows(input_dir: Path) -> tuple[list[str], list[dict[str, str]]]:
         for row in reader:
           candidate_id = parse_int(row["candidate_id"])
           if candidate_id not in rows_by_id:
+            rerank_row(row, category_weights)
             rows_by_id[candidate_id] = row
     if header is None:
       raise FileNotFoundError(f"no shard score CSV files found under {input_dir}")
@@ -91,7 +210,6 @@ def write_html(path: Path, rows: list[dict[str, str]], max_rows: int) -> None:
           f"<td>{html.escape(row.get('composite_score', ''))}</td>"
           f"<td>{html.escape(row.get('rejected', ''))}</td>"
           f"<td>{html.escape(row.get('failure_reason', ''))}</td>"
-          f"<td>{html.escape(row.get('recipe_summary', ''))}</td>"
           "</tr>"
       )
 
@@ -121,7 +239,6 @@ def write_html(path: Path, rows: list[dict[str, str]], max_rows: int) -> None:
         <th>Composite</th>
         <th>Rejected</th>
         <th>Failure</th>
-        <th>Recipe</th>
       </tr>
     </thead>
     <tbody>
@@ -142,9 +259,11 @@ def main() -> int:
     parser.add_argument("--output-html", default="generated/twist_candidate_report.html")
     parser.add_argument("--top-count", type=int, default=200)
     parser.add_argument("--html-max-rows", type=int, default=2000)
+    parser.add_argument("--knobs", default="src/Knobs.hpp")
     args = parser.parse_args()
 
-    header, rows = load_rows(Path(args.input_dir))
+    category_weights = load_category_weights(Path(args.knobs))
+    header, rows = load_rows(Path(args.input_dir), category_weights)
     write_csv(Path(args.output_csv), header, rows)
     write_summary(Path(args.output_summary), rows, args.top_count)
     write_html(Path(args.output_html), rows, args.html_max_rows)

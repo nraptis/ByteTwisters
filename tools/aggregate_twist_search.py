@@ -77,6 +77,7 @@ def load_suite_csv(path: Path) -> dict[int, dict[str, Any]]:
                 "uniformity_score": parse_float(row["uniformity_score"]),
                 "predictability_score": parse_float(row["predictability_score"]),
                 "avalanche_score": parse_float(row["avalanche_score"]),
+                "bit_inclusion_score": parse_float(row.get("bit_inclusion_score", "")),
                 "distinctness_score": parse_float(row["distinctness_score"]),
                 "entropy": parse_float(row["entropy"]),
                 "reduced_chi_squared": parse_float(row["reduced_chi_squared"]),
@@ -86,18 +87,18 @@ def load_suite_csv(path: Path) -> dict[int, dict[str, Any]]:
                 "least_common_byte_count": parse_int(row.get("least_common_byte_count", "")),
                 "avalanche_byte_ratio": parse_float(row["avalanche_byte_ratio"]),
                 "avalanche_bit_ratio": parse_float(row["avalanche_bit_ratio"]),
+                "bit_inclusion_byte_ratio": parse_float(row.get("bit_inclusion_byte_ratio", "")),
+                "bit_inclusion_bit_ratio": parse_float(row.get("bit_inclusion_bit_ratio", "")),
                 "rejected": parse_bool(row["rejected"]),
                 "failure_reason": row["failure_reason"],
                 "recipe_summary": row["recipe_summary"],
                 "repeat_found": parse_bool(row["repeat_found"]),
                 "cycle_found": parse_bool(row["cycle_found"]),
                 "long_repeat_verified": parse_bool(row.get("long_repeat_verified", "false")),
-                "exact_repeat_64_found": parse_bool(row.get("exact_repeat_64_found", "false")),
-                "exact_repeat_64_position": parse_int(row.get("exact_repeat_64_position", "")),
-                "exact_repeat_64_trial": parse_int(row.get("exact_repeat_64_trial", "")),
-                "exact_repeat_128_found": parse_bool(row.get("exact_repeat_128_found", "false")),
-                "exact_repeat_128_position": parse_int(row.get("exact_repeat_128_position", "")),
-                "exact_repeat_128_trial": parse_int(row.get("exact_repeat_128_trial", "")),
+                "long_repeat_match_found": parse_bool(row.get("long_repeat_match_found", "false")),
+                "long_repeat_match_position": parse_int(row.get("long_repeat_match_position", "")),
+                "long_repeat_match_trial": parse_int(row.get("long_repeat_match_trial", "")),
+                "long_repeat_match_length": parse_int(row.get("long_repeat_match_length", "")),
                 "first_block_hash": parse_int(row.get("first_block_hash", "")),
                 "signature_lo": parse_int(row.get("signature_lo", "")),
                 "signature_hi": parse_int(row.get("signature_hi", "")),
@@ -148,13 +149,10 @@ def signature_distance(left: dict[str, Any], right: dict[str, Any]) -> float:
     return sum(distances) / max(1, len(distances))
 
 
-def format_exact(row: dict[str, Any]) -> str:
-    parts: list[str] = []
-    if row["exact_repeat_64_found"]:
-        parts.append(f"64@{row['exact_repeat_64_position']}")
-    if row["exact_repeat_128_found"]:
-        parts.append(f"128@{row['exact_repeat_128_position']}")
-    return "|".join(parts) if parts else "clear"
+def format_long_repeat(row: dict[str, Any]) -> str:
+    if not row["long_repeat_match_found"]:
+        return "clear"
+    return f"{row['long_repeat_match_length']}@{row['long_repeat_match_position']}"
 
 
 def combine_rows(
@@ -209,9 +207,9 @@ def combine_rows(
             )
             row[f"{scenario}_predictability"] = suite_row["predictability_score"]
             row[f"{scenario}_avalanche"] = suite_row["avalanche_score"]
-            row[f"{scenario}_exact64"] = suite_row["exact_repeat_64_found"]
-            row[f"{scenario}_exact128"] = suite_row["exact_repeat_128_found"]
-            row[f"{scenario}_exact_text"] = format_exact(suite_row)
+            row[f"{scenario}_inclusion"] = suite_row["bit_inclusion_score"]
+            row[f"{scenario}_long_repeat"] = suite_row["long_repeat_match_found"]
+            row[f"{scenario}_long_repeat_text"] = format_long_repeat(suite_row)
             row[f"{scenario}_signature_lo"] = suite_row["signature_lo"]
             row[f"{scenario}_signature_hi"] = suite_row["signature_hi"]
         combined.append(row)
@@ -304,26 +302,29 @@ def write_ranked_text(
         for index, row in enumerate(rows, start=1):
             handle.write(
                 f"{index}. candidate_id={row['candidate_id']} function={row['function_name']} "
-                f"overall={row['overall_score']:.6f} stale={row['stale_score']:.6f} "
-                f"pseudorandom={row['pseudorandom_score']:.6f} structured={row['structured_score']:.6f} "
-                f"min={row['min_score']:.6f} balance={row['balance_score']:.6f} "
+                f"overall={row['overall_score']:.3f} stale={row['stale_score']:.3f} "
+                f"pseudorandom={row['pseudorandom_score']:.3f} structured={row['structured_score']:.3f} "
+                f"min={row['min_score']:.3f} balance={row['balance_score']:.3f} "
                 f"rejected_count={row['rejected_count']}\n"
             )
             handle.write(
-                f"   stale: failure={row['stale_failure']} exact={row['stale_exact_text']} "
-                f"uniformity={row['stale_uniformity']:.6f} spread={row['stale_spread']:.6f} "
+                f"   stale: failure={row['stale_failure']} repeat_scan={row['stale_long_repeat_text']} "
+                f"uniformity={row['stale_uniformity']:.3f} spread={row['stale_spread']:.3f} "
+                f"avalanche={row['stale_avalanche']:.3f} inclusion={row['stale_inclusion']:.3f} "
                 f"most={row['stale_most_common']} least={row['stale_least_common']} "
                 f"gap={row['stale_histogram_gap']}\n"
             )
             handle.write(
-                f"   pseudorandom: failure={row['pseudorandom_failure']} exact={row['pseudorandom_exact_text']} "
-                f"uniformity={row['pseudorandom_uniformity']:.6f} spread={row['pseudorandom_spread']:.6f} "
+                f"   pseudorandom: failure={row['pseudorandom_failure']} repeat_scan={row['pseudorandom_long_repeat_text']} "
+                f"uniformity={row['pseudorandom_uniformity']:.3f} spread={row['pseudorandom_spread']:.3f} "
+                f"avalanche={row['pseudorandom_avalanche']:.3f} inclusion={row['pseudorandom_inclusion']:.3f} "
                 f"most={row['pseudorandom_most_common']} least={row['pseudorandom_least_common']} "
                 f"gap={row['pseudorandom_histogram_gap']}\n"
             )
             handle.write(
-                f"   structured: failure={row['structured_failure']} exact={row['structured_exact_text']} "
-                f"uniformity={row['structured_uniformity']:.6f} spread={row['structured_spread']:.6f} "
+                f"   structured: failure={row['structured_failure']} repeat_scan={row['structured_long_repeat_text']} "
+                f"uniformity={row['structured_uniformity']:.3f} spread={row['structured_spread']:.3f} "
+                f"avalanche={row['structured_avalanche']:.3f} inclusion={row['structured_inclusion']:.3f} "
                 f"most={row['structured_most_common']} least={row['structured_least_common']} "
                 f"gap={row['structured_histogram_gap']}\n"
             )
@@ -346,17 +347,16 @@ def write_html_report(
                 "<tr>"
                 f"<td>{rank}</td>"
                 f"<td>{row['candidate_id']} / {html.escape(row['function_name'])}</td>"
-                f"<td>{row['overall_score']:.4f}</td>"
-                f"<td>{row['stale_score']:.4f}</td>"
-                f"<td>{row['pseudorandom_score']:.4f}</td>"
-                f"<td>{row['structured_score']:.4f}</td>"
-                f"<td>{row['min_score']:.4f}</td>"
-                f"<td>{row['balance_score']:.4f}</td>"
-                f"<td>{row['stale_uniformity']:.4f} / {row['stale_histogram_gap']}</td>"
-                f"<td>{row['pseudorandom_uniformity']:.4f} / {row['pseudorandom_histogram_gap']}</td>"
-                f"<td>{row['structured_uniformity']:.4f} / {row['structured_histogram_gap']}</td>"
+                f"<td>{row['overall_score']:.3f}</td>"
+                f"<td>{row['stale_score']:.3f}</td>"
+                f"<td>{row['pseudorandom_score']:.3f}</td>"
+                f"<td>{row['structured_score']:.3f}</td>"
+                f"<td>{row['min_score']:.3f}</td>"
+                f"<td>{row['balance_score']:.3f}</td>"
+                f"<td>{row['stale_uniformity']:.3f} / {row['stale_histogram_gap']} / {row['stale_inclusion']:.3f}</td>"
+                f"<td>{row['pseudorandom_uniformity']:.3f} / {row['pseudorandom_histogram_gap']} / {row['pseudorandom_inclusion']:.3f}</td>"
+                f"<td>{row['structured_uniformity']:.3f} / {row['structured_histogram_gap']} / {row['structured_inclusion']:.3f}</td>"
                 f"<td>{row['rejected_count']}</td>"
-                f"<td>{html.escape(row['recipe_summary'])}</td>"
                 "</tr>"
             )
         return "\n".join(pieces)
@@ -382,21 +382,21 @@ def write_html_report(
   <div class="section">
     <h2>Final 16</h2>
     <table>
-      <thead><tr><th>Rank</th><th>Candidate</th><th>Overall</th><th>Stale</th><th>Pseudorandom</th><th>Structured</th><th>Min</th><th>Balance</th><th>Stale U/G</th><th>PRNG U/G</th><th>Struct U/G</th><th>Rejected</th><th>Recipe</th></tr></thead>
+      <thead><tr><th>Rank</th><th>Candidate</th><th>Overall</th><th>Stale</th><th>Pseudorandom</th><th>Structured</th><th>Min</th><th>Balance</th><th>Stale U/G</th><th>PRNG U/G</th><th>Struct U/G</th><th>Rejected</th></tr></thead>
       <tbody>{render_rows(finalists)}</tbody>
     </table>
   </div>
   <div class="section">
     <h2>Top 25</h2>
     <table>
-      <thead><tr><th>Rank</th><th>Candidate</th><th>Overall</th><th>Stale</th><th>Pseudorandom</th><th>Structured</th><th>Min</th><th>Balance</th><th>Stale U/G</th><th>PRNG U/G</th><th>Struct U/G</th><th>Rejected</th><th>Recipe</th></tr></thead>
+      <thead><tr><th>Rank</th><th>Candidate</th><th>Overall</th><th>Stale</th><th>Pseudorandom</th><th>Structured</th><th>Min</th><th>Balance</th><th>Stale U/G</th><th>PRNG U/G</th><th>Struct U/G</th><th>Rejected</th></tr></thead>
       <tbody>{render_rows(top_rows)}</tbody>
     </table>
   </div>
   <div class="section">
     <h2>Bottom 25</h2>
     <table>
-      <thead><tr><th>Rank</th><th>Candidate</th><th>Overall</th><th>Stale</th><th>Pseudorandom</th><th>Structured</th><th>Min</th><th>Balance</th><th>Stale U/G</th><th>PRNG U/G</th><th>Struct U/G</th><th>Rejected</th><th>Recipe</th></tr></thead>
+      <thead><tr><th>Rank</th><th>Candidate</th><th>Overall</th><th>Stale</th><th>Pseudorandom</th><th>Structured</th><th>Min</th><th>Balance</th><th>Stale U/G</th><th>PRNG U/G</th><th>Struct U/G</th><th>Rejected</th></tr></thead>
       <tbody>{render_rows(bottom_rows)}</tbody>
     </table>
   </div>
@@ -464,24 +464,27 @@ def command_finalize(args: argparse.Namespace) -> int:
                 "function_name": row["function_name"],
                 "grade": grade,
                 "grade_rank": grade_rank,
-                "composite_score": f"{row['overall_score']:.6f}",
-                "stale_score": f"{row['stale_score']:.6f}",
-                "pseudorandom_score": f"{row['pseudorandom_score']:.6f}",
-                "structured_score": f"{row['structured_score']:.6f}",
-                "min_score": f"{row['min_score']:.6f}",
-                "balance_score": f"{row['balance_score']:.6f}",
-                "stale_uniformity": f"{row['stale_uniformity']:.6f}",
-                "stale_spread": f"{row['stale_spread']:.6f}",
+                "composite_score": f"{row['overall_score']:.3f}",
+                "stale_score": f"{row['stale_score']:.3f}",
+                "pseudorandom_score": f"{row['pseudorandom_score']:.3f}",
+                "structured_score": f"{row['structured_score']:.3f}",
+                "min_score": f"{row['min_score']:.3f}",
+                "balance_score": f"{row['balance_score']:.3f}",
+                "stale_uniformity": f"{row['stale_uniformity']:.3f}",
+                "stale_inclusion": f"{row['stale_inclusion']:.3f}",
+                "stale_spread": f"{row['stale_spread']:.3f}",
                 "stale_most_common": row["stale_most_common"],
                 "stale_least_common": row["stale_least_common"],
                 "stale_histogram_gap": row["stale_histogram_gap"],
-                "pseudorandom_uniformity": f"{row['pseudorandom_uniformity']:.6f}",
-                "pseudorandom_spread": f"{row['pseudorandom_spread']:.6f}",
+                "pseudorandom_uniformity": f"{row['pseudorandom_uniformity']:.3f}",
+                "pseudorandom_inclusion": f"{row['pseudorandom_inclusion']:.3f}",
+                "pseudorandom_spread": f"{row['pseudorandom_spread']:.3f}",
                 "pseudorandom_most_common": row["pseudorandom_most_common"],
                 "pseudorandom_least_common": row["pseudorandom_least_common"],
                 "pseudorandom_histogram_gap": row["pseudorandom_histogram_gap"],
-                "structured_uniformity": f"{row['structured_uniformity']:.6f}",
-                "structured_spread": f"{row['structured_spread']:.6f}",
+                "structured_uniformity": f"{row['structured_uniformity']:.3f}",
+                "structured_inclusion": f"{row['structured_inclusion']:.3f}",
+                "structured_spread": f"{row['structured_spread']:.3f}",
                 "structured_most_common": row["structured_most_common"],
                 "structured_least_common": row["structured_least_common"],
                 "structured_histogram_gap": row["structured_histogram_gap"],
@@ -494,11 +497,11 @@ def command_finalize(args: argparse.Namespace) -> int:
         writer = csv.DictWriter(handle, fieldnames=list(final_grade_rows[0].keys()) if final_grade_rows else [
             "candidate_id", "function_name", "grade", "grade_rank", "composite_score",
             "stale_score", "pseudorandom_score", "structured_score", "min_score", "balance_score",
-            "stale_uniformity", "stale_spread", "stale_most_common", "stale_least_common",
+            "stale_uniformity", "stale_inclusion", "stale_spread", "stale_most_common", "stale_least_common",
             "stale_histogram_gap", "pseudorandom_uniformity", "pseudorandom_spread",
-            "pseudorandom_most_common", "pseudorandom_least_common",
+            "pseudorandom_inclusion", "pseudorandom_most_common", "pseudorandom_least_common",
             "pseudorandom_histogram_gap", "structured_uniformity", "structured_spread",
-            "structured_most_common", "structured_least_common", "structured_histogram_gap",
+            "structured_inclusion", "structured_most_common", "structured_least_common", "structured_histogram_gap",
             "recipe_summary"
         ])
         writer.writeheader()

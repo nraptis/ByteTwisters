@@ -1,4 +1,5 @@
 #include "Knobs.hpp"
+#include "PasswordExpander.hpp"
 #include "TwistTypes.hpp"
 
 #include "../references/AESCounter.hpp"
@@ -27,6 +28,8 @@
 namespace twist {
 namespace {
 
+using peanutbutter::expansion::key_expansion::PasswordExpander;
+
 enum class TrialCategory {
   kAES,
   kChaCha,
@@ -44,16 +47,18 @@ struct Options {
   std::string legacy_input_suite = "mixed";
   std::size_t length_factor = knobs::kLengthFactor;
   std::size_t stream_bytes = PASSWORD_EXPANDED_SIZE * knobs::kLengthFactor;
-  std::size_t cycle_block_count = knobs::kDefaultCycleBlockCount;
   std::size_t sample_windows = knobs::kDefaultSampleWindows;
   std::size_t signature_bytes = knobs::kDefaultSignatureBytes;
   std::size_t avalanche_blocks = knobs::kDefaultAvalancheBlocks;
   std::size_t avalanche_trials = knobs::kDefaultAvalancheTrials;
+  std::size_t bic_sample_bits = knobs::kDefaultBicSampleBits;
+  std::size_t second_order_trials = knobs::kDefaultSecondOrderTrials;
+  std::size_t cross_input_signature_bytes = knobs::kDefaultCrossInputSignatureBytes;
   std::size_t long_repeat_scan_bytes = knobs::kLongRepeatScanBytes;
   std::size_t long_repeat_top_count = knobs::kLongRepeatTopCandidateCount;
-  std::size_t long_repeat_window_a = knobs::kLongRepeatWindowBytesA;
-  std::size_t long_repeat_window_b = knobs::kLongRepeatWindowBytesB;
+  std::size_t long_repeat_min_match_bytes = knobs::kLongRepeatMinMatchBytes;
   std::size_t top_n = knobs::kTopCandidateCount;
+  std::size_t trial_cap_per_category = 0;
   int candidate_id = -1;
   bool candidate_id_supplied = false;
   std::size_t limit = 0;
@@ -100,32 +105,6 @@ struct ExactRepeatMatch {
   std::size_t match_length = 0;
 };
 
-struct RollingHash64 {
-  static constexpr std::uint64_t kBase = 11400714819323198485ULL;
-
-  explicit RollingHash64(std::size_t window_size) : window_size(window_size) {
-    for (std::size_t i = 0; i < window_size; ++i) {
-      power *= kBase;
-    }
-  }
-
-  void Initialize(const std::uint8_t* data) {
-    hash = 0;
-    for (std::size_t i = 0; i < window_size; ++i) {
-      hash = (hash * kBase) + static_cast<std::uint64_t>(data[i]) + 1ULL;
-    }
-  }
-
-  void Slide(std::uint8_t outgoing, std::uint8_t incoming) {
-    hash = (hash * kBase) + static_cast<std::uint64_t>(incoming) + 1ULL;
-    hash -= power * (static_cast<std::uint64_t>(outgoing) + 1ULL);
-  }
-
-  std::size_t window_size;
-  std::uint64_t hash = 0;
-  std::uint64_t power = 1;
-};
-
 struct GradeInfo {
   const char* label;
   int rank;
@@ -151,6 +130,11 @@ struct CandidateResult {
   double uniformity_score = 0.0;
   double predictability_score = 0.0;
   double avalanche_score = 0.0;
+  double completeness_score = 0.0;
+  double bic_score = 0.0;
+  double bit_inclusion_score = 0.0;
+  double nonlinearity_score = 0.0;
+  double cross_input_collision_score = 0.0;
   double distinctness_score = 0.0;
   double composite_score = 0.0;
   double entropy = 0.0;
@@ -164,17 +148,27 @@ struct CandidateResult {
   double conditional_entropy = 0.0;
   double avalanche_byte_ratio = 0.0;
   double avalanche_bit_ratio = 0.0;
+  double avalanche_min_byte_ratio = 1.0;
+  double avalanche_max_byte_ratio = 0.0;
+  double avalanche_min_bit_ratio = 1.0;
+  double avalanche_max_bit_ratio = 0.0;
+  double bit_inclusion_byte_ratio = 0.0;
+  double bit_inclusion_bit_ratio = 0.0;
+  double bic_bit_bias = 0.5;
+  double bic_pair_bias = 0.5;
+  double second_order_byte_ratio = 0.0;
+  double second_order_bit_ratio = 0.0;
+  int cross_input_nearest_hamming = 0;
+  bool cross_input_collision_found = false;
   std::size_t first_repeat_window = std::numeric_limits<std::size_t>::max();
   std::size_t first_cycle_block = std::numeric_limits<std::size_t>::max();
   std::size_t cycle_length = 0;
-  std::size_t exact_repeat_64_position = std::numeric_limits<std::size_t>::max();
-  std::size_t exact_repeat_128_position = std::numeric_limits<std::size_t>::max();
-  std::size_t exact_repeat_64_trial = std::numeric_limits<std::size_t>::max();
-  std::size_t exact_repeat_128_trial = std::numeric_limits<std::size_t>::max();
+  std::size_t long_repeat_match_position = std::numeric_limits<std::size_t>::max();
+  std::size_t long_repeat_match_trial = std::numeric_limits<std::size_t>::max();
+  std::size_t long_repeat_match_length = 0;
   bool repeat_found = false;
   bool cycle_found = false;
-  bool exact_repeat_64_found = false;
-  bool exact_repeat_128_found = false;
+  bool long_repeat_match_found = false;
   bool long_repeat_verified = false;
   bool rejected = false;
   std::string failure_reason;
@@ -199,6 +193,94 @@ void FinalizeScores(std::vector<CandidateResult>& results, const Options& option
 
 double Clamp(double value, double lower, double upper) {
   return std::max(lower, std::min(value, upper));
+}
+
+std::size_t RoundUpToWindowMultiple(std::size_t value) {
+  if (value == 0U) {
+    return PASSWORD_EXPANDED_SIZE;
+  }
+  const std::size_t remainder = value % PASSWORD_EXPANDED_SIZE;
+  if (remainder == 0U) {
+    return value;
+  }
+  return value + (PASSWORD_EXPANDED_SIZE - remainder);
+}
+
+std::size_t WindowCountForBytes(std::size_t value) {
+  return RoundUpToWindowMultiple(value) / PASSWORD_EXPANDED_SIZE;
+}
+
+std::vector<std::size_t> BuildSampleBlockPositions(
+    std::size_t total_blocks,
+    std::size_t sample_count) {
+  std::vector<std::size_t> positions;
+  if (total_blocks == 0U) {
+    return positions;
+  }
+
+  const std::size_t desired = std::min(total_blocks, std::max<std::size_t>(1U, sample_count));
+  positions.reserve(desired);
+  if (desired == 1U) {
+    positions.push_back(0U);
+    return positions;
+  }
+
+  std::size_t previous = std::numeric_limits<std::size_t>::max();
+  for (std::size_t index = 0; index < desired; ++index) {
+    std::size_t position =
+        (index * (total_blocks - 1U) + ((desired - 1U) / 2U)) / (desired - 1U);
+    if (previous != std::numeric_limits<std::size_t>::max() && position <= previous) {
+      position = std::min(total_blocks - 1U, previous + 1U);
+    }
+    positions.push_back(position);
+    previous = position;
+  }
+  return positions;
+}
+
+std::vector<std::size_t> BuildEvenlySpacedPositions(
+    std::size_t total_positions,
+    std::size_t sample_count) {
+  std::vector<std::size_t> positions;
+  if (total_positions == 0U || sample_count == 0U) {
+    return positions;
+  }
+  const std::size_t desired = std::min(total_positions, sample_count);
+  positions.reserve(desired);
+  if (desired == 1U) {
+    positions.push_back(0U);
+    return positions;
+  }
+  std::size_t previous = std::numeric_limits<std::size_t>::max();
+  for (std::size_t index = 0; index < desired; ++index) {
+    std::size_t position =
+        (index * (total_positions - 1U) + ((desired - 1U) / 2U)) / (desired - 1U);
+    if (previous != std::numeric_limits<std::size_t>::max() && position <= previous) {
+      position = std::min(total_positions - 1U, previous + 1U);
+    }
+    positions.push_back(position);
+    previous = position;
+  }
+  return positions;
+}
+
+Window128 BuildSignatureFromBytes(const std::vector<std::uint8_t>& bytes, std::size_t limit_bytes) {
+  Window128 signature;
+  const std::size_t size = std::min(limit_bytes, bytes.size());
+  std::uint64_t lo = 1469598103934665603ULL;
+  std::uint64_t hi = 1099511628211ULL ^ 0x9E3779B97F4A7C15ULL;
+  for (std::size_t index = 0; index < size; ++index) {
+    lo ^= static_cast<std::uint64_t>(bytes[index]) +
+          (static_cast<std::uint64_t>(index) << 8U);
+    lo *= 1099511628211ULL;
+    const std::size_t reverse_index = size - 1U - index;
+    hi ^= static_cast<std::uint64_t>(bytes[reverse_index]) +
+          (static_cast<std::uint64_t>(index) << 16U);
+    hi *= 1469598103934665603ULL;
+  }
+  signature.lo = Mix64(lo ^ static_cast<std::uint64_t>(size));
+  signature.hi = Mix64(hi ^ (static_cast<std::uint64_t>(size) << 32U));
+  return signature;
 }
 
 std::uint64_t RuntimeSeed() {
@@ -291,7 +373,7 @@ GradeInfo ComputeGrade(double composite_score) {
 
 std::string FormatDouble(double value) {
   std::ostringstream stream;
-  stream << std::fixed << std::setprecision(6) << value;
+  stream << std::fixed << std::setprecision(3) << value;
   return stream.str();
 }
 
@@ -360,12 +442,23 @@ std::size_t TotalConfiguredTrials() {
   return total;
 }
 
-std::vector<TrialSpec> BuildTrialPlan() {
+std::size_t EffectiveTrialCount(const Options& options, const CategoryConfig& config) {
+  if (options.trial_cap_per_category == 0U) {
+    return config.trial_count;
+  }
+  return std::min(config.trial_count, options.trial_cap_per_category);
+}
+
+std::vector<TrialSpec> BuildTrialPlan(const Options& options) {
   std::vector<TrialSpec> plan;
-  plan.reserve(TotalConfiguredTrials());
+  std::size_t reserved = 0U;
+  for (const CategoryConfig& config : CategoryConfigs()) {
+    reserved += EffectiveTrialCount(options, config);
+  }
+  plan.reserve(reserved);
   std::size_t global_index = 0;
   for (const CategoryConfig& config : CategoryConfigs()) {
-    for (std::size_t ordinal = 0; ordinal < config.trial_count; ++ordinal) {
+    for (std::size_t ordinal = 0; ordinal < EffectiveTrialCount(options, config); ++ordinal) {
       plan.push_back({config.category, ordinal, global_index});
       ++global_index;
     }
@@ -446,11 +539,27 @@ const char* InputLabel(TrialCategory category, std::size_t trial_index) {
 }
 
 const char* LabelForGlobalTrialIndex(std::size_t global_trial_index) {
-  static const std::vector<TrialSpec> plan = BuildTrialPlan();
+  static const Options default_options;
+  static const std::vector<TrialSpec> plan = BuildTrialPlan(default_options);
   if (global_trial_index >= plan.size()) {
     return "unknown";
   }
   return InputLabel(plan[global_trial_index].category, plan[global_trial_index].ordinal_within_category);
+}
+
+bool IncludeTrialInCrossInputSignatureSet(TrialCategory category, std::size_t trial_index) {
+  switch (category) {
+    case TrialCategory::kZeros:
+    case TrialCategory::kOnes:
+      return trial_index == 0U;
+    case TrialCategory::kAES:
+    case TrialCategory::kChaCha:
+    case TrialCategory::kPredictableA:
+    case TrialCategory::kPredictableB:
+    case TrialCategory::kPredictableC:
+      return true;
+  }
+  return true;
 }
 
 std::uint64_t ScenarioTrialSeed(
@@ -525,62 +634,44 @@ void FillSourceForTrial(
   }
 }
 
-ExactRepeatMatch FindFirstExactWindowRepeat(
+std::vector<std::uint8_t> GenerateExpandedStream(
+    TwistFunction function,
+    const std::vector<std::uint8_t>& source,
+    std::size_t stream_bytes) {
+  std::vector<std::uint8_t> expanded_source = source;
+  std::vector<std::uint8_t> worker_a(PASSWORD_EXPANDED_SIZE);
+  std::vector<std::uint8_t> worker_b(PASSWORD_EXPANDED_SIZE);
+  unsigned char key_stack[kRoundKeyStackDepth][kRoundKeyBytes]{};
+  unsigned char mask_stack_a[kMaskStackDepth][kMaskBytes]{};
+  unsigned char mask_stack_b[kMaskStackDepth][kMaskBytes]{};
+  unsigned char next_round_key_buffer[kRoundKeyBytes]{};
+  unsigned char next_round_mask_buffer_a[kMaskBytes]{};
+  unsigned char next_round_mask_buffer_b[kMaskBytes]{};
+  std::vector<std::uint8_t> stream(stream_bytes);
+  if (stream.empty()) {
+    return stream;
+  }
+
+  PasswordExpander::ExpandPassword(
+      function,
+      expanded_source.data(),
+      worker_a.data(),
+      worker_b.data(),
+      stream.data(),
+      key_stack,
+      mask_stack_a,
+      mask_stack_b,
+      next_round_key_buffer,
+      next_round_mask_buffer_a,
+      next_round_mask_buffer_b,
+      static_cast<unsigned int>(stream.size()));
+  return stream;
+}
+
+const std::uint8_t* BlockData(
     const std::vector<std::uint8_t>& stream,
-    std::size_t window_size) {
-  ExactRepeatMatch result;
-  if (window_size == 0U || stream.size() < window_size) {
-    return result;
-  }
-
-  const std::size_t window_count = stream.size() - window_size + 1U;
-  std::size_t capacity = 1U;
-  while (capacity < ((window_count * 10U) / 7U) + 1U) {
-    capacity <<= 1U;
-  }
-  const std::size_t mask = capacity - 1U;
-
-  std::vector<std::uint64_t> hashes(capacity, 0ULL);
-  std::vector<std::uint32_t> positions(capacity, std::numeric_limits<std::uint32_t>::max());
-
-  RollingHash64 rolling(window_size);
-  rolling.Initialize(stream.data());
-
-  for (std::size_t position = 0; position < window_count; ++position) {
-    const std::uint64_t hash = Mix64(rolling.hash ^ static_cast<std::uint64_t>(window_size));
-    std::size_t slot = static_cast<std::size_t>(hash) & mask;
-    while (true) {
-      if (positions[slot] == std::numeric_limits<std::uint32_t>::max()) {
-        hashes[slot] = hash;
-        positions[slot] = static_cast<std::uint32_t>(position);
-        break;
-      }
-      if (hashes[slot] == hash) {
-        const std::size_t prior = positions[slot];
-        if (std::memcmp(
-                stream.data() + prior,
-                stream.data() + position,
-                window_size) == 0) {
-          if (!result.found ||
-              prior < result.first_position ||
-              (prior == result.first_position && position < result.repeat_position)) {
-            result.found = true;
-            result.first_position = prior;
-            result.repeat_position = position;
-            result.match_length = window_size;
-          }
-          break;
-        }
-      }
-      slot = (slot + 1U) & mask;
-    }
-
-    if (position + 1U < window_count) {
-      rolling.Slide(stream[position], stream[position + window_size]);
-    }
-  }
-
-  return result;
+    std::size_t block_index) {
+  return stream.data() + (block_index * PASSWORD_EXPANDED_SIZE);
 }
 
 ExactRepeatMatch FindBestRepeatedMatchLZ(
@@ -681,6 +772,19 @@ CandidateResult EvaluateCandidateForPlan(
   std::uint64_t differing_bytes = 0U;
   std::uint64_t differing_bits = 0U;
   std::uint64_t compared_bytes = 0U;
+  std::uint64_t second_order_differing_bytes = 0U;
+  std::uint64_t second_order_differing_bits = 0U;
+  std::uint64_t second_order_compared_bytes = 0U;
+  std::uint64_t included_byte_slots = 0U;
+  std::uint64_t included_bit_slots = 0U;
+  std::uint64_t total_inclusion_byte_slots = 0U;
+  std::uint64_t total_inclusion_bit_slots = 0U;
+  std::vector<Window128> cross_input_signatures;
+  cross_input_signatures.reserve(trial_plan.size());
+
+  std::vector<std::uint64_t> bic_one_counts(options.bic_sample_bits, 0U);
+  std::vector<std::uint64_t> bic_pair_counts(options.bic_sample_bits * options.bic_sample_bits, 0U);
+  std::uint64_t bic_observation_count = 0U;
 
   for (const TrialSpec& trial : trial_plan) {
     const std::uint64_t trial_seed =
@@ -689,11 +793,13 @@ CandidateResult EvaluateCandidateForPlan(
     std::vector<std::uint8_t> source(PASSWORD_EXPANDED_SIZE);
     FillSourceForTrial(source, trial.category, options.seed, trial.ordinal_within_category);
     const std::vector<std::uint8_t> initial_source = source;
-
-    std::vector<std::uint8_t> worker(PASSWORD_EXPANDED_SIZE);
-    std::vector<std::uint8_t> dest(PASSWORD_EXPANDED_SIZE);
-    std::vector<std::vector<std::uint8_t>> base_blocks;
-    base_blocks.reserve(options.avalanche_blocks);
+    const std::size_t required_blocks = WindowCountForBytes(options.stream_bytes);
+    const std::vector<std::size_t> sampled_block_positions =
+        BuildSampleBlockPositions(required_blocks, options.avalanche_blocks);
+    std::vector<std::vector<std::uint8_t>> sampled_baseline_blocks(sampled_block_positions.size());
+    std::size_t sampled_block_cursor = 0U;
+    const std::vector<std::uint8_t> baseline_stream =
+        GenerateExpandedStream(candidate.function, initial_source, options.stream_bytes);
 
     const std::size_t window_stride = std::max<std::size_t>(
         1U, options.stream_bytes / std::max<std::size_t>(1U, options.sample_windows));
@@ -704,26 +810,28 @@ CandidateResult EvaluateCandidateForPlan(
     std::size_t rolling_position = 0;
     std::size_t trial_processed_bytes = 0;
     std::optional<std::uint8_t> previous_byte;
+    std::vector<std::uint8_t> cross_input_signature_bytes;
+    cross_input_signature_bytes.reserve(options.cross_input_signature_bytes);
 
-    const std::size_t required_blocks =
-        (options.stream_bytes + PASSWORD_EXPANDED_SIZE - 1U) / PASSWORD_EXPANDED_SIZE;
-    const std::size_t total_blocks = std::max(required_blocks, options.cycle_block_count);
+    const std::size_t total_blocks = required_blocks;
     std::unordered_map<std::uint64_t, std::vector<std::size_t>> block_hashes;
     block_hashes.reserve(total_blocks * 2U);
     std::vector<std::vector<std::uint8_t>> seen_blocks;
     seen_blocks.reserve(total_blocks);
 
     for (std::size_t block_index = 0; block_index < total_blocks; ++block_index) {
-      candidate.function(source.data(), worker.data(), dest.data());
+      const std::uint8_t* block = BlockData(baseline_stream, block_index);
+      const std::vector<std::uint8_t> current_block(
+          block, block + PASSWORD_EXPANDED_SIZE);
 
-      const std::uint64_t block_hash = HashBytes64(dest.data(), dest.size());
+      const std::uint64_t block_hash = HashBytes64(block, PASSWORD_EXPANDED_SIZE);
       if (trial.global_index == 0U && block_index == 0U) {
         result.first_block_hash = block_hash;
       }
       const auto block_match = block_hashes.find(block_hash);
       if (block_match != block_hashes.end() && !result.cycle_found) {
         for (const std::size_t prior_index : block_match->second) {
-          if (seen_blocks[prior_index] == dest) {
+          if (seen_blocks[prior_index] == current_block) {
             result.cycle_found = true;
             result.first_cycle_block = std::min(result.first_cycle_block, prior_index);
             result.cycle_length = result.cycle_length == 0U
@@ -733,20 +841,23 @@ CandidateResult EvaluateCandidateForPlan(
           }
         }
       }
-      seen_blocks.emplace_back(dest.begin(), dest.end());
+      seen_blocks.push_back(current_block);
       block_hashes[block_hash].push_back(block_index);
 
-      if (base_blocks.size() < options.avalanche_blocks) {
-        base_blocks.emplace_back(dest.begin(), dest.end());
+      if (sampled_block_cursor < sampled_block_positions.size() &&
+          block_index == sampled_block_positions[sampled_block_cursor]) {
+        sampled_baseline_blocks[sampled_block_cursor].assign(
+            block, block + PASSWORD_EXPANDED_SIZE);
+        ++sampled_block_cursor;
       }
 
       const std::size_t bytes_to_scan =
           trial_processed_bytes < options.stream_bytes
-              ? std::min<std::size_t>(dest.size(), options.stream_bytes - trial_processed_bytes)
+              ? std::min<std::size_t>(PASSWORD_EXPANDED_SIZE, options.stream_bytes - trial_processed_bytes)
               : 0U;
 
       for (std::size_t i = 0; i < bytes_to_scan; ++i) {
-        const std::uint8_t byte = dest[i];
+        const std::uint8_t byte = block[i];
         histogram[byte] += 1U;
 
         if (previous_byte.has_value()) {
@@ -791,20 +902,35 @@ CandidateResult EvaluateCandidateForPlan(
           signature_bytes_seen += 1U;
         }
 
+        if (cross_input_signature_bytes.size() < options.cross_input_signature_bytes) {
+          cross_input_signature_bytes.push_back(byte);
+        }
+
         processed_bytes += 1U;
         trial_processed_bytes += 1U;
       }
-
-      std::copy(dest.begin(), dest.end(), source.begin());
     }
 
-    if (!base_blocks.empty()) {
-      std::vector<std::uint8_t> alt_source(PASSWORD_EXPANDED_SIZE);
-      std::vector<std::uint8_t> alt_worker(PASSWORD_EXPANDED_SIZE);
-      std::vector<std::uint8_t> alt_dest(PASSWORD_EXPANDED_SIZE);
+    if (IncludeTrialInCrossInputSignatureSet(trial.category, trial.ordinal_within_category)) {
+      cross_input_signatures.push_back(
+          BuildSignatureFromBytes(cross_input_signature_bytes, options.cross_input_signature_bytes));
+    }
+
+    if (!sampled_baseline_blocks.empty()) {
+      std::vector<std::uint8_t> byte_inclusion_flags(
+          sampled_baseline_blocks.size() * PASSWORD_EXPANDED_SIZE, 0U);
+      std::vector<std::uint8_t> bit_inclusion_flags(
+          sampled_baseline_blocks.size() * PASSWORD_EXPANDED_SIZE * 8U, 0U);
+      std::vector<std::uint8_t> flattened_diff(
+          sampled_baseline_blocks.size() * PASSWORD_EXPANDED_SIZE, 0U);
+      std::uint64_t trial_included_byte_slots = 0U;
+      std::uint64_t trial_included_bit_slots = 0U;
+      const std::vector<std::size_t> bic_sample_positions = BuildEvenlySpacedPositions(
+          flattened_diff.size() * 8U, options.bic_sample_bits);
 
       for (std::size_t avalanche_trial = 0; avalanche_trial < options.avalanche_trials; ++avalanche_trial) {
-        alt_source = initial_source;
+        std::vector<std::uint8_t> alt_source = initial_source;
+        std::fill(flattened_diff.begin(), flattened_diff.end(), 0U);
         const std::uint64_t flip_token =
             Mix64(trial_seed ^ (static_cast<std::uint64_t>(avalanche_trial) * 0xBF58476D1CE4E5B9ULL));
         const std::size_t flip_index =
@@ -812,18 +938,144 @@ CandidateResult EvaluateCandidateForPlan(
         const std::uint8_t bit_mask =
             static_cast<std::uint8_t>(1U << ((flip_token >> 8U) & 7U));
         alt_source[flip_index] ^= bit_mask;
+        const std::vector<std::uint8_t> alt_stream =
+            GenerateExpandedStream(candidate.function, alt_source, options.stream_bytes);
 
-        for (std::size_t block_index = 0; block_index < base_blocks.size(); ++block_index) {
-          candidate.function(alt_source.data(), alt_worker.data(), alt_dest.data());
-          const std::vector<std::uint8_t>& baseline = base_blocks[block_index];
+        std::uint64_t local_differing_bytes = 0U;
+        std::uint64_t local_differing_bits = 0U;
+        std::uint64_t local_compared_bytes = 0U;
+        for (std::size_t sample_index = 0; sample_index < sampled_block_positions.size(); ++sample_index) {
+          const std::vector<std::uint8_t>& baseline = sampled_baseline_blocks[sample_index];
+          const std::uint8_t* alt_block =
+              BlockData(alt_stream, sampled_block_positions[sample_index]);
           for (std::size_t i = 0; i < baseline.size(); ++i) {
-            const std::uint8_t diff = static_cast<std::uint8_t>(baseline[i] ^ alt_dest[i]);
+            const std::uint8_t diff = static_cast<std::uint8_t>(baseline[i] ^ alt_block[i]);
             differing_bytes += static_cast<std::uint64_t>(diff != 0U);
             differing_bits += static_cast<std::uint64_t>(
                 std::popcount(static_cast<unsigned int>(diff)));
+            local_differing_bytes += static_cast<std::uint64_t>(diff != 0U);
+            local_differing_bits += static_cast<std::uint64_t>(
+                std::popcount(static_cast<unsigned int>(diff)));
+            flattened_diff[(sample_index * baseline.size()) + i] = diff;
+            if (diff == 0U) {
+              continue;
+            }
+            const std::size_t byte_slot = (sample_index * baseline.size()) + i;
+            if (byte_inclusion_flags[byte_slot] == 0U) {
+              byte_inclusion_flags[byte_slot] = 1U;
+              ++trial_included_byte_slots;
+            }
+            const std::size_t bit_slot_base = byte_slot * 8U;
+            for (std::size_t bit = 0; bit < 8U; ++bit) {
+              if (((diff >> bit) & 1U) == 0U) {
+                continue;
+              }
+              if (bit_inclusion_flags[bit_slot_base + bit] == 0U) {
+                bit_inclusion_flags[bit_slot_base + bit] = 1U;
+                ++trial_included_bit_slots;
+              }
+            }
           }
           compared_bytes += baseline.size();
-          std::copy(alt_dest.begin(), alt_dest.end(), alt_source.begin());
+          local_compared_bytes += baseline.size();
+        }
+
+        if (local_compared_bytes > 0U) {
+          const double local_byte_ratio =
+              static_cast<double>(local_differing_bytes) /
+              static_cast<double>(local_compared_bytes);
+          const double local_bit_ratio =
+              static_cast<double>(local_differing_bits) /
+              static_cast<double>(local_compared_bytes * 8U);
+          result.avalanche_min_byte_ratio =
+              std::min(result.avalanche_min_byte_ratio, local_byte_ratio);
+          result.avalanche_max_byte_ratio =
+              std::max(result.avalanche_max_byte_ratio, local_byte_ratio);
+          result.avalanche_min_bit_ratio =
+              std::min(result.avalanche_min_bit_ratio, local_bit_ratio);
+          result.avalanche_max_bit_ratio =
+              std::max(result.avalanche_max_bit_ratio, local_bit_ratio);
+
+          if (!bic_sample_positions.empty()) {
+            std::vector<std::uint8_t> observation_bits(bic_sample_positions.size(), 0U);
+            for (std::size_t sample_index = 0; sample_index < bic_sample_positions.size(); ++sample_index) {
+              const std::size_t bit_position = bic_sample_positions[sample_index];
+              const std::size_t byte_position = bit_position / 8U;
+              const std::size_t bit_offset = bit_position % 8U;
+              observation_bits[sample_index] =
+                  static_cast<std::uint8_t>((flattened_diff[byte_position] >> bit_offset) & 1U);
+            }
+            for (std::size_t left = 0; left < observation_bits.size(); ++left) {
+              bic_one_counts[left] += observation_bits[left];
+              const std::size_t row_offset = left * observation_bits.size();
+              for (std::size_t right = 0; right < observation_bits.size(); ++right) {
+                bic_pair_counts[row_offset + right] +=
+                    static_cast<std::uint64_t>(observation_bits[left] & observation_bits[right]);
+              }
+            }
+            bic_observation_count += 1U;
+          }
+        }
+      }
+
+      included_byte_slots += trial_included_byte_slots;
+      included_bit_slots += trial_included_bit_slots;
+      total_inclusion_byte_slots +=
+          static_cast<std::uint64_t>(sampled_baseline_blocks.size()) * PASSWORD_EXPANDED_SIZE;
+      total_inclusion_bit_slots +=
+          static_cast<std::uint64_t>(sampled_baseline_blocks.size()) * PASSWORD_EXPANDED_SIZE * 8U;
+
+      for (std::size_t second_trial = 0; second_trial < options.second_order_trials; ++second_trial) {
+        std::vector<std::uint8_t> alt_source = initial_source;
+        std::vector<std::uint8_t> alt_source_b = initial_source;
+        std::vector<std::uint8_t> alt_source_ab = initial_source;
+        const std::uint64_t token_a =
+            Mix64(trial_seed ^ (static_cast<std::uint64_t>(second_trial) * 0x94D049BB133111EBULL) ^
+                  0xA0761D6478BD642FULL);
+        std::uint64_t token_b =
+            Mix64(trial_seed ^ (static_cast<std::uint64_t>(second_trial) * 0xBF58476D1CE4E5B9ULL) ^
+                  0xE7037ED1A0B428DBULL);
+        const std::size_t flip_index_a =
+            static_cast<std::size_t>(token_a % PASSWORD_EXPANDED_SIZE);
+        const std::uint8_t bit_mask_a =
+            static_cast<std::uint8_t>(1U << ((token_a >> 8U) & 7U));
+        std::size_t flip_index_b =
+            static_cast<std::size_t>(token_b % PASSWORD_EXPANDED_SIZE);
+        std::uint8_t bit_mask_b =
+            static_cast<std::uint8_t>(1U << ((token_b >> 8U) & 7U));
+        if (flip_index_a == flip_index_b && bit_mask_a == bit_mask_b) {
+          token_b = Mix64(token_b ^ 0x6A09E667F3BCC909ULL);
+          flip_index_b = static_cast<std::size_t>(token_b % PASSWORD_EXPANDED_SIZE);
+          bit_mask_b = static_cast<std::uint8_t>(1U << ((token_b >> 8U) & 7U));
+        }
+        alt_source[flip_index_a] ^= bit_mask_a;
+        alt_source_b[flip_index_b] ^= bit_mask_b;
+        alt_source_ab[flip_index_a] ^= bit_mask_a;
+        alt_source_ab[flip_index_b] ^= bit_mask_b;
+
+        const std::vector<std::uint8_t> alt_stream =
+            GenerateExpandedStream(candidate.function, alt_source, options.stream_bytes);
+        const std::vector<std::uint8_t> alt_stream_b =
+            GenerateExpandedStream(candidate.function, alt_source_b, options.stream_bytes);
+        const std::vector<std::uint8_t> alt_stream_ab =
+            GenerateExpandedStream(candidate.function, alt_source_ab, options.stream_bytes);
+
+        for (std::size_t sample_index = 0; sample_index < sampled_block_positions.size(); ++sample_index) {
+          const std::vector<std::uint8_t>& baseline = sampled_baseline_blocks[sample_index];
+          const std::uint8_t* block_a =
+              BlockData(alt_stream, sampled_block_positions[sample_index]);
+          const std::uint8_t* block_b =
+              BlockData(alt_stream_b, sampled_block_positions[sample_index]);
+          const std::uint8_t* block_ab =
+              BlockData(alt_stream_ab, sampled_block_positions[sample_index]);
+          for (std::size_t i = 0; i < baseline.size(); ++i) {
+            const std::uint8_t second_diff = static_cast<std::uint8_t>(
+                baseline[i] ^ block_a[i] ^ block_b[i] ^ block_ab[i]);
+            second_order_differing_bytes += static_cast<std::uint64_t>(second_diff != 0U);
+            second_order_differing_bits += static_cast<std::uint64_t>(
+                std::popcount(static_cast<unsigned int>(second_diff)));
+          }
+          second_order_compared_bytes += baseline.size();
         }
       }
     }
@@ -951,13 +1203,130 @@ CandidateResult EvaluateCandidateForPlan(
         static_cast<double>(differing_bytes) / static_cast<double>(compared_bytes);
     result.avalanche_bit_ratio =
         static_cast<double>(differing_bits) / static_cast<double>(compared_bytes * 8U);
+  } else {
+    result.avalanche_min_byte_ratio = 0.0;
+    result.avalanche_max_byte_ratio = 0.0;
+    result.avalanche_min_bit_ratio = 0.0;
+    result.avalanche_max_bit_ratio = 0.0;
+  }
+  if (total_inclusion_byte_slots > 0U) {
+    result.bit_inclusion_byte_ratio =
+        static_cast<double>(included_byte_slots) /
+        static_cast<double>(total_inclusion_byte_slots);
+  }
+  if (total_inclusion_bit_slots > 0U) {
+    result.bit_inclusion_bit_ratio =
+        static_cast<double>(included_bit_slots) /
+        static_cast<double>(total_inclusion_bit_slots);
+  }
+  if (second_order_compared_bytes > 0U) {
+    result.second_order_byte_ratio =
+        static_cast<double>(second_order_differing_bytes) /
+        static_cast<double>(second_order_compared_bytes);
+    result.second_order_bit_ratio =
+        static_cast<double>(second_order_differing_bits) /
+        static_cast<double>(second_order_compared_bytes * 8U);
   }
 
-  const double score_avalanche_bits =
-      Clamp(((result.avalanche_bit_ratio - 0.01) / 0.24) * 100.0, 0.0, 100.0);
-  const double score_avalanche_bytes =
-      Clamp(((result.avalanche_byte_ratio - 0.02) / 0.48) * 100.0, 0.0, 100.0);
-  result.avalanche_score = (score_avalanche_bits * 0.60) + (score_avalanche_bytes * 0.40);
+  if (bic_observation_count > 0U && !bic_one_counts.empty()) {
+    double bit_bias_sum = 0.0;
+    double pair_bias_sum = 0.0;
+    std::size_t pair_count = 0U;
+    for (std::size_t left = 0; left < bic_one_counts.size(); ++left) {
+      const double p_left =
+          static_cast<double>(bic_one_counts[left]) / static_cast<double>(bic_observation_count);
+      bit_bias_sum += std::fabs(p_left - 0.5);
+      const std::size_t row_offset = left * bic_one_counts.size();
+      for (std::size_t right = left + 1U; right < bic_one_counts.size(); ++right) {
+        const double p_right =
+            static_cast<double>(bic_one_counts[right]) / static_cast<double>(bic_observation_count);
+        const double p_pair =
+            static_cast<double>(bic_pair_counts[row_offset + right]) /
+            static_cast<double>(bic_observation_count);
+        pair_bias_sum += std::fabs(p_pair - (p_left * p_right));
+        pair_count += 1U;
+      }
+    }
+    result.bic_bit_bias = bit_bias_sum / static_cast<double>(bic_one_counts.size());
+    result.bic_pair_bias =
+        pair_count > 0U ? (pair_bias_sum / static_cast<double>(pair_count)) : 0.5;
+  }
+
+  result.cross_input_nearest_hamming = 128;
+  for (std::size_t left = 0; left < cross_input_signatures.size(); ++left) {
+    for (std::size_t right = left + 1U; right < cross_input_signatures.size(); ++right) {
+      if (cross_input_signatures[left] == cross_input_signatures[right]) {
+        result.cross_input_collision_found = true;
+      }
+      const int hamming =
+          std::popcount(cross_input_signatures[left].lo ^ cross_input_signatures[right].lo) +
+          std::popcount(cross_input_signatures[left].hi ^ cross_input_signatures[right].hi);
+      result.cross_input_nearest_hamming =
+          std::min(result.cross_input_nearest_hamming, hamming);
+    }
+  }
+  if (cross_input_signatures.size() <= 1U) {
+    result.cross_input_nearest_hamming = 128;
+  }
+
+  constexpr double kIdealAvalancheBitRatio = 0.5;
+  constexpr double kIdealAvalancheByteRatio = 255.0 / 256.0;
+  const double score_avalanche_bits_avg =
+      Clamp(100.0 - (std::fabs(result.avalanche_bit_ratio - kIdealAvalancheBitRatio) / 0.06) * 100.0,
+            0.0, 100.0);
+  const double score_avalanche_bytes_avg =
+      Clamp(100.0 - (std::fabs(result.avalanche_byte_ratio - kIdealAvalancheByteRatio) / 0.03) * 100.0,
+            0.0, 100.0);
+  const double score_avalanche_bits_floor =
+      Clamp(((result.avalanche_min_bit_ratio - 0.42) / 0.08) * 100.0, 0.0, 100.0);
+  const double score_avalanche_bytes_floor =
+      Clamp(((result.avalanche_min_byte_ratio - 0.94) / 0.05) * 100.0, 0.0, 100.0);
+  const double score_avalanche_bits_spread =
+      Clamp(100.0 - ((result.avalanche_max_bit_ratio - result.avalanche_min_bit_ratio) / 0.06) * 100.0,
+            0.0, 100.0);
+  const double score_avalanche_bytes_spread =
+      Clamp(100.0 - ((result.avalanche_max_byte_ratio - result.avalanche_min_byte_ratio) / 0.04) * 100.0,
+            0.0, 100.0);
+  result.avalanche_score =
+      (score_avalanche_bits_avg * 0.40) + (score_avalanche_bits_floor * 0.25) +
+      (score_avalanche_bits_spread * 0.20) + (score_avalanche_bytes_avg * 0.05) +
+      (score_avalanche_bytes_floor * 0.05) + (score_avalanche_bytes_spread * 0.05);
+  result.completeness_score =
+      (Clamp(((result.avalanche_min_byte_ratio - 0.94) / 0.05) * 100.0, 0.0, 100.0) * 0.40) +
+      (Clamp(((result.bit_inclusion_byte_ratio - 0.92) / 0.07) * 100.0, 0.0, 100.0) * 0.25) +
+      (Clamp(((result.avalanche_min_bit_ratio - 0.43) / 0.07) * 100.0, 0.0, 100.0) * 0.20) +
+      (Clamp(((result.bit_inclusion_bit_ratio - 0.72) / 0.20) * 100.0, 0.0, 100.0) * 0.15);
+
+  const double ideal_bit_inclusion_ratio =
+      1.0 - std::pow(0.5, static_cast<double>(options.avalanche_trials));
+  const double ideal_byte_inclusion_ratio =
+      1.0 - std::pow(1.0 - kIdealAvalancheByteRatio, static_cast<double>(options.avalanche_trials));
+  const double score_inclusion_bits =
+      Clamp(100.0 - (std::fabs(result.bit_inclusion_bit_ratio - ideal_bit_inclusion_ratio) / 0.08) * 100.0,
+            0.0, 100.0);
+  const double score_inclusion_bytes =
+      Clamp(100.0 - (std::fabs(result.bit_inclusion_byte_ratio - ideal_byte_inclusion_ratio) / 0.03) * 100.0,
+            0.0, 100.0);
+  result.bit_inclusion_score =
+      (score_inclusion_bits * 0.75) + (score_inclusion_bytes * 0.25);
+  const double score_bic_bits =
+      Clamp(100.0 - (result.bic_bit_bias / 0.10) * 100.0, 0.0, 100.0);
+  const double score_bic_pairs =
+      Clamp(100.0 - (result.bic_pair_bias / 0.06) * 100.0, 0.0, 100.0);
+  result.bic_score = (score_bic_bits * 0.35) + (score_bic_pairs * 0.65);
+  const double score_second_order_bits =
+      Clamp(100.0 - (std::fabs(result.second_order_bit_ratio - 0.5) / 0.08) * 100.0, 0.0, 100.0);
+  const double score_second_order_bytes =
+      Clamp(100.0 - (std::fabs(result.second_order_byte_ratio - kIdealAvalancheByteRatio) / 0.05) * 100.0,
+            0.0, 100.0);
+  result.nonlinearity_score =
+      (score_second_order_bits * 0.80) + (score_second_order_bytes * 0.20);
+  double collision_score =
+      Clamp((static_cast<double>(result.cross_input_nearest_hamming) / 96.0) * 100.0, 0.0, 100.0);
+  if (result.cross_input_collision_found) {
+    collision_score = Clamp(collision_score - 50.0, 0.0, 100.0);
+  }
+  result.cross_input_collision_score = collision_score;
 
   for (int bit = 0; bit < 64; ++bit) {
     if (simhash_accumulator[bit] >= 0) {
@@ -974,16 +1343,17 @@ CandidateResult EvaluateCandidateForPlan(
 CandidateResult EvaluateCandidate(
     const RegisteredCandidate& candidate,
     const Options& options) {
-  const std::vector<TrialSpec> all_trials = BuildTrialPlan();
+  const std::vector<TrialSpec> all_trials = BuildTrialPlan(options);
   CandidateResult overall = EvaluateCandidateForPlan(candidate, options, all_trials);
 
   for (const CategoryConfig& config : CategoryConfigs()) {
-    if (config.trial_count == 0U) {
+    const std::size_t effective_trials = EffectiveTrialCount(options, config);
+    if (effective_trials == 0U) {
       continue;
     }
     std::vector<TrialSpec> category_trials;
-    category_trials.reserve(config.trial_count);
-    for (std::size_t i = 0; i < config.trial_count; ++i) {
+    category_trials.reserve(effective_trials);
+    for (std::size_t i = 0; i < effective_trials; ++i) {
       category_trials.push_back({config.category, i, i});
     }
     CandidateResult category_result =
@@ -1008,22 +1378,9 @@ std::vector<std::uint8_t> GenerateCandidateStream(
     std::uint64_t base_seed,
     std::size_t stream_bytes) {
   std::vector<std::uint8_t> source(PASSWORD_EXPANDED_SIZE);
-  std::vector<std::uint8_t> worker(PASSWORD_EXPANDED_SIZE);
-  std::vector<std::uint8_t> dest(PASSWORD_EXPANDED_SIZE);
   std::vector<std::uint8_t> stream(stream_bytes);
   FillSourceForTrial(source, trial.category, base_seed, trial.ordinal_within_category);
-
-  std::size_t produced = 0;
-  while (produced < stream_bytes) {
-    candidate.function(source.data(), worker.data(), dest.data());
-    const std::size_t bytes_to_copy =
-        std::min<std::size_t>(dest.size(), stream_bytes - produced);
-    std::memcpy(stream.data() + produced, dest.data(), bytes_to_copy);
-    produced += bytes_to_copy;
-    std::copy(dest.begin(), dest.end(), source.begin());
-  }
-
-  return stream;
+  return GenerateExpandedStream(candidate.function, source, stream.size());
 }
 
 bool VerifyLongRepeats(
@@ -1056,39 +1413,23 @@ bool VerifyLongRepeats(
     result.long_repeat_verified = true;
     verified_any = true;
 
-    const std::vector<TrialSpec> plan = BuildTrialPlan();
+    const std::vector<TrialSpec> plan = BuildTrialPlan(options);
     for (const TrialSpec& trial : plan) {
       const std::vector<std::uint8_t> stream = GenerateCandidateStream(
           candidate, trial, options.seed, options.long_repeat_scan_bytes);
-
-      std::size_t min_match_bytes = 0U;
-      if (options.long_repeat_window_a > 0U && options.long_repeat_window_b > 0U) {
-        min_match_bytes = std::min(options.long_repeat_window_a, options.long_repeat_window_b);
-      } else if (options.long_repeat_window_a > 0U) {
-        min_match_bytes = options.long_repeat_window_a;
-      } else {
-        min_match_bytes = options.long_repeat_window_b;
-      }
-
       const ExactRepeatMatch repeat_match =
-          FindBestRepeatedMatchLZ(stream, min_match_bytes);
-      if (repeat_match.found) {
-        if (!result.exact_repeat_64_found && options.long_repeat_window_a > 0U &&
-            repeat_match.match_length >= options.long_repeat_window_a) {
-          result.exact_repeat_64_found = true;
-          result.exact_repeat_64_position = repeat_match.first_position;
-          result.exact_repeat_64_trial = trial.global_index;
-        }
-        if (!result.exact_repeat_128_found && options.long_repeat_window_b > 0U &&
-            repeat_match.match_length >= options.long_repeat_window_b) {
-          result.exact_repeat_128_found = true;
-          result.exact_repeat_128_position = repeat_match.first_position;
-          result.exact_repeat_128_trial = trial.global_index;
-        }
+          FindBestRepeatedMatchLZ(stream, options.long_repeat_min_match_bytes);
+      if (!repeat_match.found) {
+        continue;
       }
-
-      if (result.exact_repeat_64_found && result.exact_repeat_128_found) {
-        break;
+      if (!result.long_repeat_match_found ||
+          repeat_match.match_length > result.long_repeat_match_length ||
+          (repeat_match.match_length == result.long_repeat_match_length &&
+           repeat_match.first_position < result.long_repeat_match_position)) {
+        result.long_repeat_match_found = true;
+        result.long_repeat_match_position = repeat_match.first_position;
+        result.long_repeat_match_trial = trial.global_index;
+        result.long_repeat_match_length = repeat_match.match_length;
       }
     }
   }
@@ -1128,33 +1469,34 @@ void ComputeDistinctness(std::vector<CandidateResult>& results) {
 
 void FinalizeScores(std::vector<CandidateResult>& results, const Options& options) {
   for (CandidateResult& result : results) {
-    if (result.exact_repeat_64_found || result.exact_repeat_128_found) {
-      std::size_t earliest_repeat = std::numeric_limits<std::size_t>::max();
-      std::size_t window_size = 0U;
-      if (result.exact_repeat_64_found) {
-        earliest_repeat = result.exact_repeat_64_position;
-        window_size = 64U;
-      }
-      if (result.exact_repeat_128_found &&
-          result.exact_repeat_128_position < earliest_repeat) {
-        earliest_repeat = result.exact_repeat_128_position;
-        window_size = 128U;
-      }
+    if (result.long_repeat_match_found) {
       const double repeat_ratio =
-          static_cast<double>(earliest_repeat + window_size) /
+          static_cast<double>(result.long_repeat_match_position +
+                              std::max<std::size_t>(1U, result.long_repeat_match_length)) /
           std::max<double>(1.0, static_cast<double>(options.long_repeat_scan_bytes));
-      const double exact_repeat_score =
-          Clamp(100.0 * std::sqrt(repeat_ratio), 0.0, 95.0);
-      result.repeat_score = std::min(result.repeat_score, exact_repeat_score);
+      const double length_factor = Clamp(
+          static_cast<double>(options.long_repeat_min_match_bytes) /
+              static_cast<double>(std::max<std::size_t>(1U, result.long_repeat_match_length)),
+          0.20, 1.00);
+      const double long_repeat_score =
+          Clamp(100.0 * std::sqrt(repeat_ratio) * length_factor, 0.0, 95.0);
+      result.repeat_score = std::min(result.repeat_score, long_repeat_score);
     }
 
-    result.composite_score =
-        (result.repeat_score * 0.22) + (result.cycle_score * 0.22) +
-        (result.uniformity_score * 0.22) + (result.predictability_score * 0.16) +
-        (result.avalanche_score * 0.12) + (result.distinctness_score * 0.06);
+    const double structural_composite_score =
+        (result.repeat_score * 0.12) + (result.cycle_score * 0.10) +
+        (result.uniformity_score * 0.12) + (result.predictability_score * 0.10) +
+        (result.avalanche_score * 0.16) + (result.completeness_score * 0.10) +
+        (result.bic_score * 0.10) + (result.bit_inclusion_score * 0.08) +
+        (result.nonlinearity_score * 0.08) +
+        (result.cross_input_collision_score * 0.10) +
+        (result.distinctness_score * 0.04);
+    result.composite_score = structural_composite_score;
 
     double weighted_category_score = 0.0;
     std::size_t weighted_category_trials = 0;
+    double weakest_category_score = std::numeric_limits<double>::max();
+    std::vector<double> present_category_scores;
     for (const CategoryConfig& config : CategoryConfigs()) {
       const std::size_t index = CategoryIndex(config.category);
       if (!result.category_present[index] || config.trial_count == 0U) {
@@ -1162,18 +1504,41 @@ void FinalizeScores(std::vector<CandidateResult>& results, const Options& option
       }
       weighted_category_score += result.category_scores[index] * static_cast<double>(config.trial_count);
       weighted_category_trials += config.trial_count;
+      weakest_category_score = std::min(weakest_category_score, result.category_scores[index]);
+      present_category_scores.push_back(result.category_scores[index]);
     }
     if (weighted_category_trials > 0U) {
-      result.composite_score =
+      const double average_category_score =
           weighted_category_score / static_cast<double>(weighted_category_trials);
+      std::sort(present_category_scores.begin(), present_category_scores.end());
+      const std::size_t lower_tail_count = std::min<std::size_t>(2U, present_category_scores.size());
+      double lower_tail_score = weakest_category_score;
+      if (lower_tail_count > 0U) {
+        lower_tail_score =
+            std::accumulate(
+                present_category_scores.begin(),
+                present_category_scores.begin() + static_cast<std::ptrdiff_t>(lower_tail_count), 0.0) /
+            static_cast<double>(lower_tail_count);
+      }
+      result.composite_score =
+          (structural_composite_score * 0.20) +
+          (average_category_score * 0.35) +
+          (lower_tail_score * 0.25) +
+          (weakest_category_score * 0.20);
+      result.composite_score = Clamp(result.composite_score, 0.0, 100.0);
     }
 
-    const std::array<std::pair<const char*, double>, 6> components = {{
+    const std::array<std::pair<const char*, double>, 11> components = {{
         {"repeat resistance", result.repeat_score},
         {"cycle resistance", result.cycle_score},
         {"uniformity", result.uniformity_score},
         {"predictability", result.predictability_score},
         {"avalanche", result.avalanche_score},
+        {"completeness", result.completeness_score},
+        {"BIC", result.bic_score},
+        {"bit inclusion", result.bit_inclusion_score},
+        {"nonlinearity", result.nonlinearity_score},
+        {"cross-input collision", result.cross_input_collision_score},
         {"distinctness", result.distinctness_score},
     }};
 
@@ -1182,40 +1547,43 @@ void FinalizeScores(std::vector<CandidateResult>& results, const Options& option
         [](const auto& left, const auto& right) { return left.second < right.second; });
     result.failure_reason = weakest->first;
     if (weighted_category_trials > 0U) {
-      double weakest_category_score = std::numeric_limits<double>::max();
+      double weakest_category_score_for_reason = std::numeric_limits<double>::max();
       const char* weakest_category_name = weakest->first;
       for (const CategoryConfig& config : CategoryConfigs()) {
         const std::size_t index = CategoryIndex(config.category);
         if (!result.category_present[index]) {
           continue;
         }
-        if (result.category_scores[index] < weakest_category_score) {
-          weakest_category_score = result.category_scores[index];
+        if (result.category_scores[index] < weakest_category_score_for_reason) {
+          weakest_category_score_for_reason = result.category_scores[index];
           weakest_category_name = TrialCategoryName(config.category);
         }
       }
       result.failure_reason = weakest_category_name;
     }
 
-    if (result.exact_repeat_64_found) {
-      result.failure_reason = "exact 64-byte repeat";
-    }
-    if (result.exact_repeat_128_found) {
-      result.failure_reason = "exact 128-byte repeat";
+    if (result.long_repeat_match_found) {
+      result.failure_reason = "long repeat match";
     }
 
     const bool catastrophic_repeat =
         (result.repeat_found && result.first_repeat_window < 65536U) ||
-        result.exact_repeat_64_found || result.exact_repeat_128_found;
+        result.long_repeat_match_found;
     const bool catastrophic_cycle =
         result.cycle_found && result.cycle_length > 0U && result.cycle_length < 4U;
     const bool catastrophic_uniformity =
         result.entropy < 7.0 || result.max_deviation > 0.35;
+    const bool catastrophic_diffusion =
+        result.avalanche_min_bit_ratio < 0.30 || result.completeness_score < 45.0 ||
+        result.bit_inclusion_score < 45.0;
+    const bool catastrophic_structure =
+        result.bic_score < 15.0 || result.nonlinearity_score < 35.0;
 
-    result.rejected = catastrophic_repeat || catastrophic_cycle || catastrophic_uniformity;
+    result.rejected = catastrophic_repeat || catastrophic_cycle || catastrophic_uniformity ||
+                      catastrophic_diffusion || catastrophic_structure;
 
     if (result.rejected) {
-      result.composite_score = std::min(result.composite_score, 39.9);
+      result.composite_score = Clamp(result.composite_score - 25.0, 0.0, 100.0);
     }
 
     const GradeInfo grade = ComputeGrade(result.composite_score);
@@ -1239,16 +1607,19 @@ void WriteCsv(
     const std::vector<CandidateResult>& results,
     const Options& options) {
   std::ofstream output(path);
-  const std::vector<TrialSpec> trial_plan = BuildTrialPlan();
+  const std::vector<TrialSpec> trial_plan = BuildTrialPlan(options);
   output
       << "input_mix,candidate_id,function_name,grade,grade_rank,composite_score,repeat_score,cycle_score,"
-      << "uniformity_score,predictability_score,avalanche_score,distinctness_score,"
+      << "uniformity_score,predictability_score,avalanche_score,completeness_score,bic_score,"
+      << "bit_inclusion_score,nonlinearity_score,cross_input_collision_score,distinctness_score,"
       << "entropy,reduced_chi_squared,max_deviation,byte_count_spread_ratio,"
       << "most_common_byte_count,least_common_byte_count,equal_rate_drift,correlation,"
-      << "conditional_entropy,avalanche_byte_ratio,avalanche_bit_ratio,repeat_found,"
+      << "conditional_entropy,avalanche_byte_ratio,avalanche_bit_ratio,"
+      << "avalanche_min_byte_ratio,avalanche_max_byte_ratio,avalanche_min_bit_ratio,avalanche_max_bit_ratio,"
+      << "bit_inclusion_byte_ratio,bit_inclusion_bit_ratio,bic_bit_bias,bic_pair_bias,"
+      << "second_order_byte_ratio,second_order_bit_ratio,cross_input_nearest_hamming,cross_input_collision_found,repeat_found,"
       << "first_repeat_window,cycle_found,first_cycle_block,cycle_length,long_repeat_verified,"
-      << "exact_repeat_64_found,exact_repeat_64_position,exact_repeat_64_trial,"
-      << "exact_repeat_128_found,exact_repeat_128_position,exact_repeat_128_trial,"
+      << "long_repeat_match_found,long_repeat_match_position,long_repeat_match_trial,long_repeat_match_length,"
       << "first_block_hash,signature_lo,signature_hi,rejected,"
       << "failure_reason,recipe_summary,"
       << "aes_score,aes_grade,chacha_score,chacha_grade,zeros_score,zeros_grade,ones_score,ones_grade,"
@@ -1266,6 +1637,11 @@ void WriteCsv(
            << FormatDouble(result.uniformity_score) << ','
            << FormatDouble(result.predictability_score) << ','
            << FormatDouble(result.avalanche_score) << ','
+           << FormatDouble(result.completeness_score) << ','
+           << FormatDouble(result.bic_score) << ','
+           << FormatDouble(result.bit_inclusion_score) << ','
+           << FormatDouble(result.nonlinearity_score) << ','
+           << FormatDouble(result.cross_input_collision_score) << ','
            << FormatDouble(result.distinctness_score) << ','
            << FormatDouble(result.entropy) << ','
            << FormatDouble(result.reduced_chi_squared) << ','
@@ -1278,18 +1654,28 @@ void WriteCsv(
            << FormatDouble(result.conditional_entropy) << ','
            << FormatDouble(result.avalanche_byte_ratio) << ','
            << FormatDouble(result.avalanche_bit_ratio) << ','
+           << FormatDouble(result.avalanche_min_byte_ratio) << ','
+           << FormatDouble(result.avalanche_max_byte_ratio) << ','
+           << FormatDouble(result.avalanche_min_bit_ratio) << ','
+           << FormatDouble(result.avalanche_max_bit_ratio) << ','
+           << FormatDouble(result.bit_inclusion_byte_ratio) << ','
+           << FormatDouble(result.bit_inclusion_bit_ratio) << ','
+           << FormatDouble(result.bic_bit_bias) << ','
+           << FormatDouble(result.bic_pair_bias) << ','
+           << FormatDouble(result.second_order_byte_ratio) << ','
+           << FormatDouble(result.second_order_bit_ratio) << ','
+           << result.cross_input_nearest_hamming << ','
+           << (result.cross_input_collision_found ? "true" : "false") << ','
            << (result.repeat_found ? "true" : "false") << ','
            << (result.repeat_found ? std::to_string(result.first_repeat_window) : "") << ','
            << (result.cycle_found ? "true" : "false") << ','
            << (result.cycle_found ? std::to_string(result.first_cycle_block) : "") << ','
            << (result.cycle_found ? std::to_string(result.cycle_length) : "") << ','
            << (result.long_repeat_verified ? "true" : "false") << ','
-           << (result.exact_repeat_64_found ? "true" : "false") << ','
-           << (result.exact_repeat_64_found ? std::to_string(result.exact_repeat_64_position) : "") << ','
-           << (result.exact_repeat_64_found ? std::to_string(result.exact_repeat_64_trial) : "") << ','
-           << (result.exact_repeat_128_found ? "true" : "false") << ','
-           << (result.exact_repeat_128_found ? std::to_string(result.exact_repeat_128_position) : "") << ','
-           << (result.exact_repeat_128_found ? std::to_string(result.exact_repeat_128_trial) : "") << ','
+           << (result.long_repeat_match_found ? "true" : "false") << ','
+           << (result.long_repeat_match_found ? std::to_string(result.long_repeat_match_position) : "") << ','
+           << (result.long_repeat_match_found ? std::to_string(result.long_repeat_match_trial) : "") << ','
+           << (result.long_repeat_match_found ? std::to_string(result.long_repeat_match_length) : "") << ','
            << result.first_block_hash << ','
            << result.signature_lo << ','
            << result.signature_hi << ','
@@ -1318,7 +1704,7 @@ void WriteSummary(
     const std::vector<CandidateResult>& results,
     const Options& options) {
   std::ofstream output(path);
-  const std::vector<TrialSpec> trial_plan = BuildTrialPlan();
+  const std::vector<TrialSpec> trial_plan = BuildTrialPlan(options);
   std::size_t rejected = 0;
   for (const CandidateResult& result : results) {
     rejected += static_cast<std::size_t>(result.rejected);
@@ -1330,9 +1716,10 @@ void WriteSummary(
   output << "seed=" << options.seed << '\n';
   output << "length_factor=" << options.length_factor << '\n';
   output << "stream_bytes=" << options.stream_bytes << '\n';
+  output << "stream_windows=" << WindowCountForBytes(options.stream_bytes) << '\n';
   output << "trial_count=" << trial_plan.size() << '\n';
-  output << "cycle_block_count=" << options.cycle_block_count << '\n';
   output << "long_repeat_scan_bytes=" << options.long_repeat_scan_bytes << '\n';
+  output << "long_repeat_windows=" << WindowCountForBytes(options.long_repeat_scan_bytes) << '\n';
   output << "long_repeat_top_count=" << options.long_repeat_top_count << '\n';
   output << "source_patterns=";
   for (std::size_t trial = 0; trial < trial_plan.size(); ++trial) {
@@ -1379,9 +1766,23 @@ void WriteSummary(
              << (result.most_common_byte_count - result.least_common_byte_count)
              << " predictability=" << FormatDouble(result.predictability_score)
              << " avalanche=" << FormatDouble(result.avalanche_score)
+             << " completeness=" << FormatDouble(result.completeness_score)
+             << " bic=" << FormatDouble(result.bic_score)
+             << " avalanche_avg_bits=" << FormatDouble(result.avalanche_bit_ratio * 100.0)
+             << "%"
+             << " avalanche_min_bits=" << FormatDouble(result.avalanche_min_bit_ratio * 100.0)
+             << "%"
+             << " avalanche_max_bits=" << FormatDouble(result.avalanche_max_bit_ratio * 100.0)
+             << "%"
+             << " inclusion=" << FormatDouble(result.bit_inclusion_score)
+             << " nonlinearity=" << FormatDouble(result.nonlinearity_score)
+             << " cross_input_collision=" << FormatDouble(result.cross_input_collision_score)
              << " distinctness=" << FormatDouble(result.distinctness_score)
-             << " exact64=" << (result.exact_repeat_64_found ? "true" : "false")
-             << " exact128=" << (result.exact_repeat_128_found ? "true" : "false")
+             << " repeat_scan="
+             << (result.long_repeat_match_found
+                     ? (std::to_string(result.long_repeat_match_length) + "@" +
+                        std::to_string(result.long_repeat_match_position))
+                     : (result.long_repeat_verified ? "clear" : "not-run"))
              << " rejected=" << (result.rejected ? "true" : "false")
              << " failure_reason=" << result.failure_reason << '\n';
       output << "   recipe=" << result.recipe_summary << '\n';
@@ -1395,13 +1796,10 @@ void WriteSummary(
                << " composite=" << FormatDouble(result.category_scores[index])
                << " rejected=" << (result.category_rejected[index] ? "true" : "false") << '\n';
       }
-      if (result.exact_repeat_64_found) {
-        output << "   exact_repeat_64 position=" << result.exact_repeat_64_position
-               << " input=" << LabelForGlobalTrialIndex(result.exact_repeat_64_trial) << '\n';
-      }
-      if (result.exact_repeat_128_found) {
-        output << "   exact_repeat_128 position=" << result.exact_repeat_128_position
-               << " input=" << LabelForGlobalTrialIndex(result.exact_repeat_128_trial) << '\n';
+      if (result.long_repeat_match_found) {
+        output << "   long_repeat_match position=" << result.long_repeat_match_position
+               << " length=" << result.long_repeat_match_length
+               << " input=" << LabelForGlobalTrialIndex(result.long_repeat_match_trial) << '\n';
       }
     }
     if (wrote_header) {
@@ -1410,220 +1808,7 @@ void WriteSummary(
   }
 }
 
-void WriteHtmlReport(
-    const std::filesystem::path& path,
-    const std::vector<CandidateResult>& results,
-    const Options& options) {
-  std::ofstream output(path);
-  const std::vector<TrialSpec> trial_plan = BuildTrialPlan();
-  std::size_t rejected = 0;
-  for (const CandidateResult& result : results) {
-    rejected += static_cast<std::size_t>(result.rejected);
-  }
-
-  std::ostringstream effective_config;
-  effective_config
-      << "input_mix = mixed\n"
-      << "seed = " << options.seed << '\n'
-      << "length_factor = " << options.length_factor << '\n'
-      << "stream_bytes = " << options.stream_bytes
-      << (options.stream_bytes_supplied ? " (override)" : " (derived from length_factor)") << '\n'
-      << "trial_count = " << trial_plan.size() << '\n'
-      << "cycle_block_count = " << options.cycle_block_count << '\n'
-      << "sample_windows = " << options.sample_windows << '\n'
-      << "signature_bytes = " << options.signature_bytes << '\n'
-      << "avalanche_blocks = " << options.avalanche_blocks << '\n'
-      << "avalanche_trials = " << options.avalanche_trials << '\n'
-      << "long_repeat_scan_bytes = " << options.long_repeat_scan_bytes << '\n'
-      << "long_repeat_top_count = " << options.long_repeat_top_count << '\n'
-      << "long_repeat_window_a = " << options.long_repeat_window_a << '\n'
-      << "long_repeat_window_b = " << options.long_repeat_window_b << '\n'
-      << "top_n = " << options.top_n << '\n'
-      << "candidate_filter = "
-      << (options.candidate_id_supplied ? std::to_string(options.candidate_id) : "all") << '\n'
-      << "limit = " << (options.limit > 0U ? std::to_string(options.limit) : "none") << '\n'
-      << "source_patterns = " << SourcePatternList(trial_plan);
-
-  std::ostringstream knob_config;
-  knob_config
-      << "kRandomizeSeedByDefault = "
-      << (knobs::kRandomizeSeedByDefault ? "true" : "false") << '\n'
-      << "kRandomSeed = "
-      << (knobs::kRandomSeed == 0U ? std::string("runtime-random") : std::to_string(knobs::kRandomSeed)) << '\n'
-      << "kCandidateCount = " << knobs::kCandidateCount << '\n'
-      << "kTopCandidateCount = " << knobs::kTopCandidateCount << '\n'
-      << "kPhase1MinOps = " << knobs::kPhase1MinOps << '\n'
-      << "kPhase1MaxOps = " << knobs::kPhase1MaxOps << '\n'
-      << "kPhase2MinOps = " << knobs::kPhase2MinOps << '\n'
-      << "kPhase2MaxOps = " << knobs::kPhase2MaxOps << '\n'
-      << "kMaxTransformsTotal = " << FormatLimit(knobs::kMaxTransformsTotal) << '\n'
-      << "kMaxAddOps = " << FormatLimit(knobs::kMaxAddOps) << '\n'
-      << "kMaxSubOps = " << FormatLimit(knobs::kMaxSubOps) << '\n'
-      << "kMaxMulOps = " << FormatLimit(knobs::kMaxMulOps) << '\n'
-      << "kMaxXorOps = " << FormatLimit(knobs::kMaxXorOps) << '\n'
-      << "kMaxAndOps = " << FormatLimit(knobs::kMaxAndOps) << '\n'
-      << "kMaxOrOps = " << FormatLimit(knobs::kMaxOrOps) << '\n'
-      << "kMaxAddConstTransforms = " << FormatLimit(knobs::kMaxAddConstTransforms) << '\n'
-      << "kMaxShiftLeftTransforms = " << FormatLimit(knobs::kMaxShiftLeftTransforms) << '\n'
-      << "kMaxShiftRightTransforms = " << FormatLimit(knobs::kMaxShiftRightTransforms) << '\n'
-      << "kMaxNotTransforms = " << FormatLimit(knobs::kMaxNotTransforms) << '\n'
-      << "kMaxSwapNibblesTransforms = " << FormatLimit(knobs::kMaxSwapNibblesTransforms) << '\n'
-      << "kMaxByteLR8LeftTransforms = " << FormatLimit(knobs::kMaxByteLR8LeftTransforms) << '\n'
-      << "kMaxByteLR8RightTransforms = " << FormatLimit(knobs::kMaxByteLR8RightTransforms) << '\n'
-      << "kLengthFactor = " << knobs::kLengthFactor << '\n'
-      << "kTrialCountAES = " << knobs::kTrialCountAES << '\n'
-      << "kTrialCountChaCha = " << knobs::kTrialCountChaCha << '\n'
-      << "kTrialCountZeros = " << knobs::kTrialCountZeros << '\n'
-      << "kTrialCountOnes = " << knobs::kTrialCountOnes << '\n'
-      << "kTrialCountPredictableA = " << knobs::kTrialCountPredictableA << '\n'
-      << "kTrialCountPredictableB = " << knobs::kTrialCountPredictableB << '\n'
-      << "kTrialCountPredictableC = " << knobs::kTrialCountPredictableC << '\n'
-      << "kDefaultCycleBlockCount = " << knobs::kDefaultCycleBlockCount << '\n'
-      << "kDefaultSampleWindows = " << knobs::kDefaultSampleWindows << '\n'
-      << "kDefaultSignatureBytes = " << knobs::kDefaultSignatureBytes << '\n'
-      << "kDefaultAvalancheBlocks = " << knobs::kDefaultAvalancheBlocks << '\n'
-      << "kDefaultAvalancheTrials = " << knobs::kDefaultAvalancheTrials << '\n'
-      << "kLongRepeatScanBytes = " << knobs::kLongRepeatScanBytes << '\n'
-      << "kLongRepeatTopCandidateCount = " << knobs::kLongRepeatTopCandidateCount << '\n'
-      << "kLongRepeatWindowBytesA = " << knobs::kLongRepeatWindowBytesA << '\n'
-      << "kLongRepeatWindowBytesB = " << knobs::kLongRepeatWindowBytesB;
-
-  output << "<!doctype html>\n"
-         << "<html lang=\"en\">\n"
-         << "<head>\n"
-         << "  <meta charset=\"utf-8\">\n"
-         << "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-         << "  <title>Twist Candidate Report</title>\n"
-         << "  <style>\n"
-         << "    :root { color-scheme: light; }\n"
-         << "    body { margin: 0; font: 14px/1.5 Menlo, Monaco, 'SFMono-Regular', monospace; background: #f4efe5; color: #1f1a17; }\n"
-         << "    main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 48px; }\n"
-         << "    h1, h2 { margin: 0 0 12px; }\n"
-         << "    h1 { font-size: 28px; }\n"
-         << "    h2 { font-size: 18px; margin-top: 28px; }\n"
-         << "    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 20px 0 28px; }\n"
-         << "    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 12px; margin: 18px 0 28px; }\n"
-         << "    .card { background: #fffaf0; border: 1px solid #d8c9b2; border-radius: 12px; padding: 12px 14px; }\n"
-         << "    .label { color: #7b5a3a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }\n"
-         << "    .value { font-size: 20px; margin-top: 4px; }\n"
-         << "    .method { background: #fffaf0; border-left: 4px solid #ba8f56; padding: 14px 16px; border-radius: 8px; }\n"
-         << "    .config-card pre { margin: 10px 0 0; white-space: pre-wrap; word-break: break-word; }\n"
-         << "    table { width: 100%; border-collapse: collapse; margin-top: 14px; background: #fffaf0; border: 1px solid #d8c9b2; }\n"
-         << "    th, td { padding: 10px 8px; border-bottom: 1px solid #eadcc6; vertical-align: top; text-align: left; }\n"
-         << "    th { position: sticky; top: 0; background: #f2e3cc; }\n"
-         << "    tr:nth-child(even) td { background: #fffcf7; }\n"
-         << "    .grade { font-weight: 700; }\n"
-         << "    .recipe { max-width: 520px; white-space: normal; }\n"
-         << "  </style>\n"
-         << "</head>\n"
-         << "<body>\n"
-         << "<main>\n"
-         << "  <h1>Twist Candidate Report</h1>\n"
-         << "  <p>Sorted by grade, then composite score.</p>\n"
-         << "  <section class=\"meta\">\n"
-         << "    <div class=\"card\"><div class=\"label\">Input Mix</div><div class=\"value\">mixed</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Seed</div><div class=\"value\">" << options.seed << "</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Candidates</div><div class=\"value\">" << results.size() << "</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Rejected</div><div class=\"value\">" << rejected << "</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Trials</div><div class=\"value\">" << trial_plan.size() << "</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Stream Bytes</div><div class=\"value\">" << options.stream_bytes << "</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Cycle Blocks</div><div class=\"value\">" << options.cycle_block_count << "</div></div>\n"
-         << "    <div class=\"card\"><div class=\"label\">Long Repeat Bytes</div><div class=\"value\">" << options.long_repeat_scan_bytes << "</div></div>\n"
-         << "  </section>\n"
-         << "  <section class=\"method\">\n"
-         << "    <strong>Methodology.</strong> Each trial starts from the configured category mix shown below, then the harness measures how well each twister converts that input into high-quality output under repeated feedback. "
-         << "Population scoring still uses sampled rolling 128-bit windows plus exact block-cycle detection. "
-         << "After provisional ranking, the top candidates are re-checked with exact 64-byte and 128-byte window scans over the long-repeat stream length. "
-         << "The sections below show the effective runtime settings and the compiled defaults from Knobs.hpp.\n"
-         << "  </section>\n"
-         << "  <section class=\"config-grid\">\n"
-         << "    <div class=\"card config-card\">\n"
-         << "      <div class=\"label\">Effective Run Config</div>\n"
-         << "      <pre>" << EscapeHtml(effective_config.str()) << "</pre>\n"
-         << "    </div>\n"
-         << "    <div class=\"card config-card\">\n"
-         << "      <div class=\"label\">Knobs.hpp Defaults</div>\n"
-         << "      <pre>" << EscapeHtml(knob_config.str()) << "</pre>\n"
-         << "    </div>\n"
-         << "  </section>\n";
-
-  const std::vector<std::string> grade_order = {
-      "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"};
-
-  for (const std::string& grade : grade_order) {
-    bool wrote_header = false;
-    output << "  <section>\n";
-    for (const CandidateResult& result : results) {
-      if (result.grade != grade) {
-        continue;
-      }
-      if (!wrote_header) {
-        output << "    <h2>" << grade << "</h2>\n"
-               << "    <table>\n"
-               << "      <thead><tr>"
-               << "<th>Rank</th><th>Candidate</th><th>Composite</th><th>Repeat</th><th>Cycle</th>"
-               << "<th>Uniformity</th><th>Spread</th><th>Most</th><th>Least</th><th>Gap</th>"
-               << "<th>Predictability</th><th>Avalanche</th><th>Distinctness</th>"
-               << "<th>Exact64</th><th>Exact128</th><th>Rejected</th><th>Failure</th><th>Recipe</th>"
-               << "</tr></thead>\n"
-               << "      <tbody>\n";
-        wrote_header = true;
-      }
-    }
-
-    if (!wrote_header) {
-      output << "  </section>\n";
-      continue;
-    }
-
-    std::size_t rank = 0;
-    for (const CandidateResult& result : results) {
-      if (result.grade != grade) {
-        continue;
-      }
-      rank += 1U;
-      output << "        <tr>"
-             << "<td>" << rank << "</td>"
-             << "<td class=\"grade\">" << result.candidate_id << " / "
-             << EscapeHtml(result.function_name) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.composite_score)) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.repeat_score)) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.cycle_score)) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.uniformity_score)) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.byte_count_spread_ratio)) << "</td>"
-             << "<td>" << result.most_common_byte_count << "</td>"
-             << "<td>" << result.least_common_byte_count << "</td>"
-             << "<td>" << (result.most_common_byte_count - result.least_common_byte_count) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.predictability_score)) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.avalanche_score)) << "</td>"
-             << "<td>" << EscapeHtml(FormatDouble(result.distinctness_score)) << "</td>"
-             << "<td>"
-             << (result.exact_repeat_64_found
-                     ? (std::string("repeat@") + std::to_string(result.exact_repeat_64_position) +
-                        " / " + LabelForGlobalTrialIndex(result.exact_repeat_64_trial))
-                     : (result.long_repeat_verified ? "clear" : "not-run"))
-             << "</td>"
-             << "<td>"
-             << (result.exact_repeat_128_found
-                     ? (std::string("repeat@") + std::to_string(result.exact_repeat_128_position) +
-                        " / " + LabelForGlobalTrialIndex(result.exact_repeat_128_trial))
-                     : (result.long_repeat_verified ? "clear" : "not-run"))
-             << "</td>"
-             << "<td>" << (result.rejected ? "true" : "false") << "</td>"
-             << "<td>" << EscapeHtml(result.failure_reason) << "</td>"
-             << "<td class=\"recipe\">" << EscapeHtml(result.recipe_summary) << "</td>"
-             << "</tr>\n";
-    }
-
-    output << "      </tbody>\n"
-           << "    </table>\n"
-           << "  </section>\n";
-  }
-
-  output << "</main>\n"
-         << "</body>\n"
-         << "</html>\n";
-}
+#include "TwistCandidateHarnessHtml.inl"
 
 std::optional<Options> ParseArgs(int argc, char** argv) {
   Options options;
@@ -1670,12 +1855,18 @@ std::optional<Options> ParseArgs(int argc, char** argv) {
         return std::nullopt;
       }
       std::cerr << "--trial-count is ignored; use per-category trial count knobs in Knobs.hpp\n";
+    } else if (arg == "--trial-cap-per-category") {
+      const auto value = require_value("--trial-cap-per-category");
+      if (!value) {
+        return std::nullopt;
+      }
+      options.trial_cap_per_category = static_cast<std::size_t>(std::stoull(*value));
     } else if (arg == "--cycle-block-count") {
       const auto value = require_value("--cycle-block-count");
       if (!value) {
         return std::nullopt;
       }
-      options.cycle_block_count = static_cast<std::size_t>(std::stoull(*value));
+      std::cerr << "--cycle-block-count is ignored; run length is determined by --length-factor/--stream-bytes\n";
     } else if (arg == "--sample-windows") {
       const auto value = require_value("--sample-windows");
       if (!value) {
@@ -1700,6 +1891,24 @@ std::optional<Options> ParseArgs(int argc, char** argv) {
         return std::nullopt;
       }
       options.avalanche_trials = static_cast<std::size_t>(std::stoull(*value));
+    } else if (arg == "--bic-sample-bits") {
+      const auto value = require_value("--bic-sample-bits");
+      if (!value) {
+        return std::nullopt;
+      }
+      options.bic_sample_bits = static_cast<std::size_t>(std::stoull(*value));
+    } else if (arg == "--second-order-trials") {
+      const auto value = require_value("--second-order-trials");
+      if (!value) {
+        return std::nullopt;
+      }
+      options.second_order_trials = static_cast<std::size_t>(std::stoull(*value));
+    } else if (arg == "--cross-input-signature-bytes") {
+      const auto value = require_value("--cross-input-signature-bytes");
+      if (!value) {
+        return std::nullopt;
+      }
+      options.cross_input_signature_bytes = static_cast<std::size_t>(std::stoull(*value));
     } else if (arg == "--long-repeat-bytes") {
       const auto value = require_value("--long-repeat-bytes");
       if (!value) {
@@ -1712,18 +1921,12 @@ std::optional<Options> ParseArgs(int argc, char** argv) {
         return std::nullopt;
       }
       options.long_repeat_top_count = static_cast<std::size_t>(std::stoull(*value));
-    } else if (arg == "--long-repeat-window-a") {
-      const auto value = require_value("--long-repeat-window-a");
+    } else if (arg == "--long-repeat-min-match") {
+      const auto value = require_value("--long-repeat-min-match");
       if (!value) {
         return std::nullopt;
       }
-      options.long_repeat_window_a = static_cast<std::size_t>(std::stoull(*value));
-    } else if (arg == "--long-repeat-window-b") {
-      const auto value = require_value("--long-repeat-window-b");
-      if (!value) {
-        return std::nullopt;
-      }
-      options.long_repeat_window_b = static_cast<std::size_t>(std::stoull(*value));
+      options.long_repeat_min_match_bytes = static_cast<std::size_t>(std::stoull(*value));
     } else if (arg == "--top-n") {
       const auto value = require_value("--top-n");
       if (!value) {
@@ -1757,15 +1960,17 @@ std::optional<Options> ParseArgs(int argc, char** argv) {
           << "  --length-factor <count>\n"
           << "  --stream-bytes <bytes>\n"
           << "  --trial-count <legacy-compat-only>\n"
-          << "  --cycle-block-count <count>\n"
+          << "  --trial-cap-per-category <count>\n"
           << "  --sample-windows <count>\n"
           << "  --signature-bytes <bytes>\n"
           << "  --avalanche-blocks <count>\n"
           << "  --avalanche-trials <count>\n"
+          << "  --bic-sample-bits <count>\n"
+          << "  --second-order-trials <count>\n"
+          << "  --cross-input-signature-bytes <bytes>\n"
           << "  --long-repeat-bytes <bytes>\n"
           << "  --long-repeat-top <count>\n"
-          << "  --long-repeat-window-a <bytes>\n"
-          << "  --long-repeat-window-b <bytes>\n"
+          << "  --long-repeat-min-match <bytes>\n"
           << "  --top-n <count>\n"
           << "  --candidate-id <id>\n"
           << "  --limit <count>\n"
@@ -1783,6 +1988,16 @@ std::optional<Options> ParseArgs(int argc, char** argv) {
     options.stream_bytes =
         PASSWORD_EXPANDED_SIZE * std::max<std::size_t>(1U, options.length_factor);
   }
+  options.stream_bytes = RoundUpToWindowMultiple(options.stream_bytes);
+  options.length_factor = WindowCountForBytes(options.stream_bytes);
+  options.long_repeat_scan_bytes =
+      RoundUpToWindowMultiple(options.long_repeat_scan_bytes);
+  options.avalanche_blocks = std::max<std::size_t>(1U, options.avalanche_blocks);
+  options.avalanche_trials = std::max<std::size_t>(1U, options.avalanche_trials);
+  options.bic_sample_bits = std::max<std::size_t>(8U, options.bic_sample_bits);
+  options.second_order_trials = std::max<std::size_t>(1U, options.second_order_trials);
+  options.cross_input_signature_bytes =
+      std::max<std::size_t>(64U, options.cross_input_signature_bytes);
   return options;
 }
 
@@ -1825,8 +2040,23 @@ int Main(int argc, char** argv) {
 
   std::vector<CandidateResult> results;
   results.reserve(candidates.size());
-  for (const RegisteredCandidate* candidate : candidates) {
-    results.push_back(EvaluateCandidate(*candidate, options));
+  const auto evaluation_start = std::chrono::steady_clock::now();
+  for (std::size_t index = 0; index < candidates.size(); ++index) {
+    const RegisteredCandidate& candidate = *candidates[index];
+    const auto candidate_start = std::chrono::steady_clock::now();
+    results.push_back(EvaluateCandidate(candidate, options));
+    const auto candidate_end = std::chrono::steady_clock::now();
+    const double candidate_seconds =
+        std::chrono::duration<double>(candidate_end - candidate_start).count();
+    const double total_seconds =
+        std::chrono::duration<double>(candidate_end - evaluation_start).count();
+    std::cout << "progress "
+              << (index + 1U) << "/" << candidates.size()
+              << " candidate_id=" << candidate.candidate_id
+              << " function=" << candidate.function_name
+              << " elapsed=" << FormatDouble(total_seconds) << "s"
+              << " candidate_time=" << FormatDouble(candidate_seconds) << "s"
+              << '\n';
   }
 
   ComputeDistinctness(results);
@@ -1854,6 +2084,8 @@ int Main(int argc, char** argv) {
     std::cout << std::setw(2) << (i + 1U) << ". candidate_id=" << result.candidate_id
               << " grade=" << result.grade
               << " composite=" << FormatDouble(result.composite_score)
+              << " avalanche=" << FormatDouble(result.avalanche_score)
+              << " inclusion=" << FormatDouble(result.bit_inclusion_score)
               << " function=" << result.function_name
               << " rejected=" << (result.rejected ? "true" : "false") << '\n';
   }

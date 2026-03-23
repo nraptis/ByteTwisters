@@ -1,0 +1,179 @@
+
+MAX_FAIL=0 MAX_VERY_SUSPICIOUS=1000 NO_RESULT_FILES=0 /Users/magneto/Desktop/Codex\ Playground/Twist/run_practrand_8blk_in_place.sh /Users/magneto/Desktop/Codex\ Playground/Twist/candidates a 8blk /Users/magneto/Desktop/Codex\ Playground/Twist/generated/practrand_passers
+
+
+
+
+
+NIST Quick Gate Explainer
+=========================
+
+This is the cheap first gate for very large candidate sets, such as 250,000 candidates.
+
+What it is
+----------
+
+Tiny NIST stages are not a security proof.
+
+They are a coarse filter for:
+- obvious startup bias
+- obvious repeated-pattern leakage
+- candidates that are bad immediately from simple passwords
+
+This is a triage tool.
+
+What it is not:
+- a final ranking
+- a claim of cryptographic strength
+- a replacement for longer PractRand runs
+
+
+Why use it anyway?
+------------------
+
+Because it is cheap.
+
+If PractRand at 64 MiB takes minutes per candidate, it is not a realistic first pass over 250,000 candidates.
+
+Tiny NIST runs can still kill:
+- obviously weak starters
+- nearly identical parameter variants that collapse on simple seeds
+
+
+Recommended use
+---------------
+
+Use it before PractRand.
+
+Flow:
+1. generate a huge candidate set
+2. run the quick NIST gate
+3. only send survivors to PractRand
+
+
+Default quick gate
+------------------
+
+Script:
+
+```bash
+./run_nist_quick_gate.sh
+```
+
+By default it runs every 1-letter password in:
+
+- `a`
+- `b`
+- `c`
+- ...
+- `z`
+- `A`
+- `B`
+- `C`
+- ...
+- `Z`
+
+Each stage uses:
+
+- `61440` bytes
+
+with default threshold:
+
+- `max_fail_rows = 24`
+
+
+What 61440 bytes means
+----------------------
+
+- exactly `8` full twister blocks
+- still cheap enough to use as a front-door shredder
+- much more aligned to the actual twister cadence than an arbitrary byte count
+
+
+Example generate + quick gate
+-----------------------------
+
+Generate:
+
+```bash
+python3 generate.py --count 250000 --seed 911 --shard-size 500 --generated-dir generated --candidates-dir candidates --clean-candidates
+```
+
+Run quick gate:
+
+```bash
+./run_nist_quick_gate.sh
+```
+
+
+Outputs
+-------
+
+Each stage writes:
+- `summary_<password>_<size>.csv`
+- `passed_candidates.txt`
+- `failed_candidates.txt`
+- `failure_histogram_<password>_<size>.txt`
+- `failure_histogram_<password>_<size>.csv`
+
+Example folder:
+
+- `candidates_filtered_quick_nist_a_61440B`
+
+
+What the threshold means
+------------------------
+
+`max_fail_rows` means:
+- how many STS rows are allowed to fail before the candidate is rejected
+
+At this tiny size:
+- exact fail counts are noisy
+- the goal is rough separation, not precision
+
+So a threshold like `24` is just a practical weed-out line.
+
+You should tune it based on how aggressively you want to cut.
+
+
+How to change the stages
+------------------------
+
+Override the stage list:
+
+```bash
+STAGE_SPECS='a:61440b:24,b:61440b:24,c:61440b:24' ./run_nist_quick_gate.sh
+```
+
+Format:
+
+`password:size:max_fail_rows`
+
+Examples:
+- `cat:61440b:24`
+- `dog:61440b:24`
+- `a:61440b:24`
+
+
+What to believe from it
+-----------------------
+
+Believe:
+- very bad tiny NIST results are a real warning
+- good tiny NIST results mean "deserves more attention"
+
+Do not believe:
+- that surviving the quick gate means the candidate is strong
+- that tiny-stage fail counts are precise rankings
+
+
+Quick memory version
+--------------------
+
+If you forget everything:
+
+1. tiny NIST is a shredder, not a crown
+2. use it to kill obvious bad starters
+3. `61440` bytes means `8` full twister blocks
+4. run `a-z` and `A-Z`
+5. only send survivors to PractRand

@@ -1,0 +1,39 @@
+input_cpp=/Users/magneto/Desktop/Codex Playground/Twist/runner/consolidated_winners/shards_cpp/shard_0004.cpp
+candidate_id=88102
+password_text=b
+stream_bytes=261120
+stream_file=secret_34_outputs_retry/workspace/.practrand_stage/candidate_0088101/b_byte_stream_034BLK.bin
+practrand_bin=/Users/magneto/Desktop/Codex Playground/Twist/build/practrand/RNG_test
+report_file=secret_34_outputs_retry/workspace/.practrand_stage/candidate_0088101/practrand_reports/candidate_0088101_b_034BLK/practrand_output.txt
+fail=4
+very_suspicious=1
+suspicious=1
+mildly_suspicious=4
+unusual=4
+normalish=0
+normal=32
+total_results=46
+
+RNG_test using PractRand version 0.96
+RNG = RNG_stdin8, seed = unknown
+test set = core, folding = standard (8 bit)
+
+rng=RNG_stdin8, seed=unknown
+length= 255.000 kilobytes (2^17.994 bytes), time= 0.0 seconds
+  Test Name                         Raw       Processed     Evaluation       
+  BCFN(2+0,13-8U)                   R= +10.1  p =  1.8e-3   unusual          
+  BCFN(2+1,13-8U)                   R= +17.7  p =  1.7e-5   mildly suspicious
+  BCFN(2+2,13-9U)                   R= +26.0  p =  5.8e-7   very suspicious  
+  BCFN(2+3,13-9U)                   R= +20.2  p =  1.1e-5   mildly suspicious
+  BCFN(2+4,13-9U)                   R= +19.1  p =  2.0e-5   mildly suspicious
+  DC6-9x1Bytes-1                    R=  +6.7  p =  1.4e-3   unusual          
+  Gap-16:A                          R= +23.9  p =  6.2e-19    FAIL !         
+  Gap-16:B                          R= +24.7  p =  2.8e-19    FAIL !         
+  Gap-16:C                          R=  +9.6  p~=1-6.4e-4   unusual          
+  FPF/16:(1,14-6)                   R= +73.2  p =  4.9e-56    FAIL !!!!      
+  FPF/16:all                        R= +39.9  p =  2.3e-32    FAIL !!!       
+  FPF/16:cross                      R=  +4.7  p =  5.3e-4   unusual          
+  [Low1/8]BCFN(2+0,13-9U)           R= +19.2  p =  1.9e-5   suspicious       
+  [Low1/8]FPF/16:cross              R=  +7.1  p =  2.4e-5   mildly suspicious
+  ...and 32 test result(s) without anomalies
+

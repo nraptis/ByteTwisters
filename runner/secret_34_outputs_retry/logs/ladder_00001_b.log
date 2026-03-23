@@ -1,0 +1,514 @@
+RESULT candidate_0000560 candidate_id=561 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=3 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0000956 candidate_id=957 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=6 suspicious=1 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0001419 candidate_id=1420 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0001720 candidate_id=1721 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0002125 candidate_id=2126 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0002266 candidate_id=2267 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=4 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0002609 candidate_id=2610 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0002744 candidate_id=2745 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0002963 candidate_id=2964 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0003005 candidate_id=3006 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0003279 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0003279
+PASSER_SAVED candidate_0003279 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0003279
+RESULT candidate_0003279 candidate_id=3280 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0004428 candidate_id=4429 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0004430 candidate_id=4431 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0004713 candidate_id=4714 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0005182 candidate_id=5183 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=3 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0006004 candidate_id=6005 status=REPORT gate_status=TOO_MANY_FAIL fail=9 very_suspicious=4 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0006726 candidate_id=6727 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0007792 candidate_id=7793 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0007901 candidate_id=7902 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0008419 candidate_id=8420 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0008580 candidate_id=8581 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0009034 candidate_id=9035 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0009451 candidate_id=9452 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0009689 candidate_id=9690 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0009790 candidate_id=9791 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0010015 candidate_id=10016 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=3 total_results=46
+ZERO_FAILER_SAVED candidate_0011043 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0011043
+PASSER_SAVED candidate_0011043 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0011043
+RESULT candidate_0011043 candidate_id=11044 status=REPORT gate_status=PASS fail=0 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0011252 candidate_id=11253 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0011447 candidate_id=11448 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0011706 candidate_id=11707 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0011721 candidate_id=11722 status=REPORT gate_status=NO_REPORT fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=0 total_results=0
+RESULT candidate_0011749 candidate_id=11750 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0011811 candidate_id=11812 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0011855 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0011855
+PASSER_SAVED candidate_0011855 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0011855
+RESULT candidate_0011855 candidate_id=11856 status=REPORT gate_status=PASS fail=0 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=0 total_results=46
+RESULT candidate_0011885 candidate_id=11886 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0012004 candidate_id=12005 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0012288 candidate_id=12289 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0012556 candidate_id=12557 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0012562 candidate_id=12563 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=5 suspicious=1 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0013132 candidate_id=13133 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0013325 candidate_id=13326 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0013435 candidate_id=13436 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0014052 candidate_id=14053 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=9 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0014264 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0014264
+RESULT candidate_0014264 candidate_id=14265 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0014369 candidate_id=14370 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=3 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0014380 candidate_id=14381 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0014723 candidate_id=14724 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=4 unusual=0 total_results=46
+RESULT candidate_0014804 candidate_id=14805 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0014821 candidate_id=14822 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0015035 candidate_id=15036 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0015232 candidate_id=15233 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0015300 candidate_id=15301 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0015373 candidate_id=15374 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0015376 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0015376
+PASSER_SAVED candidate_0015376 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0015376
+RESULT candidate_0015376 candidate_id=15377 status=REPORT gate_status=PASS fail=0 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0015681 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0015681
+PASSER_SAVED candidate_0015681 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0015681
+RESULT candidate_0015681 candidate_id=15682 status=REPORT gate_status=PASS fail=0 very_suspicious=4 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0017248 candidate_id=17249 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0018484 candidate_id=18485 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0018512 candidate_id=18513 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0018891 candidate_id=18892 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0018992 candidate_id=18993 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=3 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0019155 candidate_id=19156 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0019331 candidate_id=19332 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0019469 candidate_id=19470 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0020456 candidate_id=20457 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0020500 candidate_id=20501 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0020829 candidate_id=20830 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=5 suspicious=2 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0021062 candidate_id=21063 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0021092 candidate_id=21093 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0021755 candidate_id=21756 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0021787 candidate_id=21788 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0022141 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0022141
+RESULT candidate_0022141 candidate_id=22142 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0022159 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0022159
+PASSER_SAVED candidate_0022159 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0022159
+RESULT candidate_0022159 candidate_id=22160 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0022232 candidate_id=22233 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0022308 candidate_id=22309 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0022361 candidate_id=22362 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0022625 candidate_id=22626 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0022754 candidate_id=22755 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0022808 candidate_id=22809 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0023332 candidate_id=23333 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0023450 candidate_id=23451 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0023691 candidate_id=23692 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0024158 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0024158
+RESULT candidate_0024158 candidate_id=24159 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0024560 candidate_id=24561 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0024768 candidate_id=24769 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0024780 candidate_id=24781 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0024885 candidate_id=24886 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=5 suspicious=4 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0024905 candidate_id=24906 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=3 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0025104 candidate_id=25105 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0025891 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0025891
+PASSER_SAVED candidate_0025891 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0025891
+RESULT candidate_0025891 candidate_id=25892 status=REPORT gate_status=PASS fail=0 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0025972 candidate_id=25973 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0026069 candidate_id=26070 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0026106 candidate_id=26107 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=3 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0026466 candidate_id=26467 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0026596 candidate_id=26597 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0026784 candidate_id=26785 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0026900 candidate_id=26901 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=2 mildly_suspicious=3 unusual=1 total_results=46
+RESULT candidate_0026946 candidate_id=26947 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0027162 candidate_id=27163 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0028330 candidate_id=28331 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=3 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0028376 candidate_id=28377 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0029520 candidate_id=29521 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0029627 candidate_id=29628 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0030213 candidate_id=30214 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0030389 candidate_id=30390 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=2 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0030432 candidate_id=30433 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=4 suspicious=4 mildly_suspicious=3 unusual=1 total_results=46
+RESULT candidate_0030548 candidate_id=30549 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0031055 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0031055
+RESULT candidate_0031055 candidate_id=31056 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0031116 candidate_id=31117 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0032082 candidate_id=32083 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=5 suspicious=2 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0032130 candidate_id=32131 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=2 unusual=4 total_results=46
+RESULT candidate_0032595 candidate_id=32596 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0032790 candidate_id=32791 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0033493 candidate_id=33494 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0034248 candidate_id=34249 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0034340 candidate_id=34341 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0034761 candidate_id=34762 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0035634 candidate_id=35635 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0036003 candidate_id=36004 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0036246 candidate_id=36247 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0036277 candidate_id=36278 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0036863 candidate_id=36864 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=2 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0036949 candidate_id=36950 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0037369 candidate_id=37370 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=6 suspicious=2 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0037588 candidate_id=37589 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0037679 candidate_id=37680 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0037895 candidate_id=37896 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=3 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0038000 candidate_id=38001 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0038004 candidate_id=38005 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0038027 candidate_id=38028 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0038206 candidate_id=38207 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0038284 candidate_id=38285 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0038807 candidate_id=38808 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0039400 candidate_id=39401 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0039474 candidate_id=39475 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0039741 candidate_id=39742 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0040317 candidate_id=40318 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0040750 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0040750
+RESULT candidate_0040750 candidate_id=40751 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=3 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0041625 candidate_id=41626 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0041647 candidate_id=41648 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0041758 candidate_id=41759 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0042203 candidate_id=42204 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0043302 candidate_id=43303 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=5 suspicious=0 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0043631 candidate_id=43632 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0043963 candidate_id=43964 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=3 total_results=46
+RESULT candidate_0044032 candidate_id=44033 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0044267 candidate_id=44268 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0044442 candidate_id=44443 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0044754 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0044754
+PASSER_SAVED candidate_0044754 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0044754
+RESULT candidate_0044754 candidate_id=44755 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0044894 candidate_id=44895 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0045362 candidate_id=45363 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0045645 candidate_id=45646 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0045823 candidate_id=45824 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0046256 candidate_id=46257 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=4 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0046365 candidate_id=46366 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0046479 candidate_id=46480 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0046800 candidate_id=46801 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0046907 candidate_id=46908 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0047896 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0047896
+PASSER_SAVED candidate_0047896 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0047896
+RESULT candidate_0047896 candidate_id=47897 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0048547 candidate_id=48548 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0049195 candidate_id=49196 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0049244 candidate_id=49245 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0049668 candidate_id=49669 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0049725 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0049725
+PASSER_SAVED candidate_0049725 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0049725
+RESULT candidate_0049725 candidate_id=49726 status=REPORT gate_status=PASS fail=0 very_suspicious=3 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0050828 candidate_id=50829 status=REPORT gate_status=TOO_MANY_FAIL fail=7 very_suspicious=5 suspicious=3 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0050866 candidate_id=50867 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0051097 candidate_id=51098 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0051234 candidate_id=51235 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0051437 candidate_id=51438 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=4 total_results=46
+RESULT candidate_0051679 candidate_id=51680 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0051986 candidate_id=51987 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0052018 candidate_id=52019 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0052064 candidate_id=52065 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0052373 candidate_id=52374 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0052830 candidate_id=52831 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0053146 candidate_id=53147 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=2 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0053930 candidate_id=53931 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=2 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0053956 candidate_id=53957 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0054142 candidate_id=54143 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0054254 candidate_id=54255 status=REPORT gate_status=NO_REPORT fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=0 total_results=0
+RESULT candidate_0054937 candidate_id=54938 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0055648 candidate_id=55649 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0056313 candidate_id=56314 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0056331 candidate_id=56332 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0056654 candidate_id=56655 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0056745 candidate_id=56746 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=4 total_results=46
+RESULT candidate_0057815 candidate_id=57816 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0057984 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0057984
+RESULT candidate_0057984 candidate_id=57985 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0058141 candidate_id=58142 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0059113 candidate_id=59114 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0059400 candidate_id=59401 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=2 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0060070 candidate_id=60071 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=1 suspicious=1 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0060128 candidate_id=60129 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0060265 candidate_id=60266 status=REPORT gate_status=TOO_MANY_FAIL fail=8 very_suspicious=5 suspicious=1 mildly_suspicious=4 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0060661 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0060661
+RESULT candidate_0060661 candidate_id=60662 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=3 suspicious=1 mildly_suspicious=1 unusual=4 total_results=46
+RESULT candidate_0060831 candidate_id=60832 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0061085 candidate_id=61086 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0061304 candidate_id=61305 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0061675 candidate_id=61676 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=5 unusual=1 total_results=46
+RESULT candidate_0062021 candidate_id=62022 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=1 suspicious=2 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0062364 candidate_id=62365 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=1 mildly_suspicious=5 unusual=4 total_results=46
+RESULT candidate_0062757 candidate_id=62758 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0062995 candidate_id=62996 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0063441 candidate_id=63442 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0063677 candidate_id=63678 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0063798 candidate_id=63799 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0064059 candidate_id=64060 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=2 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0064108 candidate_id=64109 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0064164 candidate_id=64165 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0064430 candidate_id=64431 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0064603 candidate_id=64604 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0064954 candidate_id=64955 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0064991 candidate_id=64992 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=4 suspicious=0 mildly_suspicious=2 unusual=4 total_results=46
+RESULT candidate_0065013 candidate_id=65014 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=3 suspicious=2 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0065277 candidate_id=65278 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0065326 candidate_id=65327 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0065461 candidate_id=65462 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=3 total_results=46
+ZERO_FAILER_SAVED candidate_0065649 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0065649
+RESULT candidate_0065649 candidate_id=65650 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0065808 candidate_id=65809 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0065984 candidate_id=65985 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=1 suspicious=0 mildly_suspicious=5 unusual=3 total_results=46
+RESULT candidate_0066218 candidate_id=66219 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0066267 candidate_id=66268 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0066472 candidate_id=66473 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0066672 candidate_id=66673 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0066773 candidate_id=66774 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0067041 candidate_id=67042 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0067233 candidate_id=67234 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0068066 candidate_id=68067 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0068087 candidate_id=68088 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=4 total_results=46
+RESULT candidate_0068311 candidate_id=68312 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0068938 candidate_id=68939 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0069186 candidate_id=69187 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0069329 candidate_id=69330 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0069837 candidate_id=69838 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0069901 candidate_id=69902 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0070156 candidate_id=70157 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0070473 candidate_id=70474 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0070542 candidate_id=70543 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0070682 candidate_id=70683 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0071237 candidate_id=71238 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0071261 candidate_id=71262 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0072376 candidate_id=72377 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=4 mildly_suspicious=4 unusual=0 total_results=46
+RESULT candidate_0072643 candidate_id=72644 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0072689 candidate_id=72690 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0072712 candidate_id=72713 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0072747 candidate_id=72748 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0072785 candidate_id=72786 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0072985 candidate_id=72986 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0073436 candidate_id=73437 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0073503 candidate_id=73504 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0074720 candidate_id=74721 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0075424 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0075424
+PASSER_SAVED candidate_0075424 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0075424
+RESULT candidate_0075424 candidate_id=75425 status=REPORT gate_status=PASS fail=0 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0075733 candidate_id=75734 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0076608 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0076608
+RESULT candidate_0076608 candidate_id=76609 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0077054 candidate_id=77055 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0077111 candidate_id=77112 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=7 suspicious=2 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0077493 candidate_id=77494 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0077642 candidate_id=77643 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0077650 candidate_id=77651 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0077754 candidate_id=77755 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0078370 candidate_id=78371 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0079463 candidate_id=79464 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0079612 candidate_id=79613 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0079614 candidate_id=79615 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0080144 candidate_id=80145 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=3 mildly_suspicious=3 unusual=1 total_results=46
+RESULT candidate_0080545 candidate_id=80546 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0081530 candidate_id=81531 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0081586 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0081586
+RESULT candidate_0081586 candidate_id=81587 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=3 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0081942 candidate_id=81943 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=2 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0081982 candidate_id=81983 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0081994 candidate_id=81995 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=3 total_results=46
+RESULT candidate_0082168 candidate_id=82169 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0082703 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0082703
+RESULT candidate_0082703 candidate_id=82704 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0082807 candidate_id=82808 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0082818 candidate_id=82819 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=4 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0082939 candidate_id=82940 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0083093 candidate_id=83094 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=4 suspicious=0 mildly_suspicious=0 unusual=5 total_results=46
+RESULT candidate_0083585 candidate_id=83586 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=7 suspicious=0 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0083659 candidate_id=83660 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=3 suspicious=1 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0083747 candidate_id=83748 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=2 unusual=4 total_results=46
+ZERO_FAILER_SAVED candidate_0083938 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0083938
+RESULT candidate_0083938 candidate_id=83939 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0084063 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0084063
+PASSER_SAVED candidate_0084063 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0084063
+RESULT candidate_0084063 candidate_id=84064 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0084257 candidate_id=84258 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0084272 candidate_id=84273 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0085017 candidate_id=85018 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=3 unusual=3 total_results=46
+RESULT candidate_0085052 candidate_id=85053 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0085746 candidate_id=85747 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0085918 candidate_id=85919 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0086142 candidate_id=86143 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0086808 candidate_id=86809 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0086841 candidate_id=86842 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0087406 candidate_id=87407 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0087527 candidate_id=87528 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0087746 candidate_id=87747 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0087905 candidate_id=87906 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0088101 candidate_id=88102 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=4 unusual=4 total_results=46
+RESULT candidate_0088244 candidate_id=88245 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=3 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0088373 candidate_id=88374 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0088706 candidate_id=88707 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0089000 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0089000
+RESULT candidate_0089000 candidate_id=89001 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0089040 candidate_id=89041 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0089176 candidate_id=89177 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0089413 candidate_id=89414 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0089616 candidate_id=89617 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0089713 candidate_id=89714 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0090222 candidate_id=90223 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0090470 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0090470
+PASSER_SAVED candidate_0090470 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0090470
+RESULT candidate_0090470 candidate_id=90471 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0090697 candidate_id=90698 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=4 suspicious=2 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0090814 candidate_id=90815 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0090949 candidate_id=90950 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0091296 candidate_id=91297 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0091318 candidate_id=91319 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=2 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0091339 candidate_id=91340 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=9 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0091958 candidate_id=91959 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0091978 candidate_id=91979 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0092156 candidate_id=92157 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=2 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0092158 candidate_id=92159 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0092277 candidate_id=92278 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=4 suspicious=2 mildly_suspicious=1 unusual=5 total_results=46
+RESULT candidate_0092494 candidate_id=92495 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0092534 candidate_id=92535 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0092640 candidate_id=92641 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0092651 candidate_id=92652 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0093906 candidate_id=93907 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=3 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0093990 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0093990
+PASSER_SAVED candidate_0093990 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0093990
+RESULT candidate_0093990 candidate_id=93991 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0094180 candidate_id=94181 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0094206 candidate_id=94207 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0094302 candidate_id=94303 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0094435 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0094435
+PASSER_SAVED candidate_0094435 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0094435
+RESULT candidate_0094435 candidate_id=94436 status=REPORT gate_status=PASS fail=0 very_suspicious=3 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0094799 candidate_id=94800 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0095451 candidate_id=95452 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0095887 candidate_id=95888 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0095923 candidate_id=95924 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0096116 candidate_id=96117 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0096300 candidate_id=96301 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=8 suspicious=1 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0096392 candidate_id=96393 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0096487 candidate_id=96488 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0096633 candidate_id=96634 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=1 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0097053 candidate_id=97054 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0097547 candidate_id=97548 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0097555 candidate_id=97556 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0097617 candidate_id=97618 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0097697 candidate_id=97698 status=REPORT gate_status=TOO_MANY_FAIL fail=1 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=4 total_results=46
+RESULT candidate_0098098 candidate_id=98099 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=0 mildly_suspicious=2 unusual=4 total_results=46
+RESULT candidate_0098236 candidate_id=98237 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0098376 candidate_id=98377 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0099323 candidate_id=99324 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0099678 candidate_id=99679 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0100217 candidate_id=100218 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0100346 candidate_id=100347 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0100701 candidate_id=100702 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=6 suspicious=3 mildly_suspicious=3 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0100717 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0100717
+PASSER_SAVED candidate_0100717 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0100717
+RESULT candidate_0100717 candidate_id=100718 status=REPORT gate_status=PASS fail=0 very_suspicious=4 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0100862 candidate_id=100863 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0101085 candidate_id=101086 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0101567 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0101567
+PASSER_SAVED candidate_0101567 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0101567
+RESULT candidate_0101567 candidate_id=101568 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0101784 candidate_id=101785 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0101836 candidate_id=101837 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0101961 candidate_id=101962 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=5 total_results=46
+RESULT candidate_0102337 candidate_id=102338 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0102381 candidate_id=102382 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0102386 candidate_id=102387 status=REPORT gate_status=TOO_MANY_FAIL fail=8 very_suspicious=7 suspicious=1 mildly_suspicious=2 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0102862 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0102862
+PASSER_SAVED candidate_0102862 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0102862
+RESULT candidate_0102862 candidate_id=102863 status=REPORT gate_status=PASS fail=0 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0103073 candidate_id=103074 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0103236 candidate_id=103237 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0103385 candidate_id=103386 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0103647 candidate_id=103648 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0104092 candidate_id=104093 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0104243 candidate_id=104244 status=REPORT gate_status=TOO_MANY_FAIL fail=9 very_suspicious=4 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0104643 candidate_id=104644 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0104765 candidate_id=104766 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0104779 candidate_id=104780 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0104852 candidate_id=104853 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0105328 candidate_id=105329 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0105363 candidate_id=105364 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0105492 candidate_id=105493 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0105508 candidate_id=105509 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0105560 candidate_id=105561 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0106086 candidate_id=106087 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=6 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0106546 candidate_id=106547 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=3 mildly_suspicious=3 unusual=1 total_results=46
+RESULT candidate_0106590 candidate_id=106591 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0106704 candidate_id=106705 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0106882 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0106882
+PASSER_SAVED candidate_0106882 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0106882
+RESULT candidate_0106882 candidate_id=106883 status=REPORT gate_status=PASS fail=0 very_suspicious=3 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0106886 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0106886
+RESULT candidate_0106886 candidate_id=106887 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0107057 candidate_id=107058 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0107240 candidate_id=107241 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0107292 candidate_id=107293 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0107425 candidate_id=107426 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=9 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0107969 candidate_id=107970 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0108170 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0108170
+PASSER_SAVED candidate_0108170 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0108170
+RESULT candidate_0108170 candidate_id=108171 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0108362 candidate_id=108363 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=2 mildly_suspicious=2 unusual=2 total_results=46
+RESULT candidate_0108375 candidate_id=108376 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0108625 candidate_id=108626 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0108732 candidate_id=108733 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0109019 candidate_id=109020 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=2 mildly_suspicious=2 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0109040 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0109040
+PASSER_SAVED candidate_0109040 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0109040
+RESULT candidate_0109040 candidate_id=109041 status=REPORT gate_status=PASS fail=0 very_suspicious=1 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0109813 candidate_id=109814 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=6 suspicious=0 mildly_suspicious=4 unusual=3 total_results=46
+RESULT candidate_0110396 candidate_id=110397 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0110487 candidate_id=110488 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0110599 candidate_id=110600 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0110792 candidate_id=110793 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0111161 candidate_id=111162 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0111500 candidate_id=111501 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=3 unusual=2 total_results=46
+RESULT candidate_0111753 candidate_id=111754 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=2 unusual=5 total_results=46
+RESULT candidate_0112015 candidate_id=112016 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0112429 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0112429
+PASSER_SAVED candidate_0112429 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0112429
+RESULT candidate_0112429 candidate_id=112430 status=REPORT gate_status=PASS fail=0 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0112631 candidate_id=112632 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=4 unusual=2 total_results=46
+RESULT candidate_0112755 candidate_id=112756 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0113161 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0113161
+RESULT candidate_0113161 candidate_id=113162 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0113325 candidate_id=113326 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=1 mildly_suspicious=3 unusual=1 total_results=46
+RESULT candidate_0113369 candidate_id=113370 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0114395 candidate_id=114396 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=3 total_results=46
+RESULT candidate_0114492 candidate_id=114493 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0115133 candidate_id=115134 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=1 mildly_suspicious=2 unusual=4 total_results=46
+RESULT candidate_0115261 candidate_id=115262 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+ZERO_FAILER_SAVED candidate_0115418 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0115418
+PASSER_SAVED candidate_0115418 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0115418
+RESULT candidate_0115418 candidate_id=115419 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0115425 candidate_id=115426 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=4 total_results=46
+RESULT candidate_0115572 candidate_id=115573 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0115614 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0115614
+PASSER_SAVED candidate_0115614 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0115614
+RESULT candidate_0115614 candidate_id=115615 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0116159 candidate_id=116160 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0116193 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0116193
+RESULT candidate_0116193 candidate_id=116194 status=REPORT gate_status=TOO_MANY_SUSPICIOUS fail=0 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0116385 candidate_id=116386 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0116584 candidate_id=116585 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=2 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+ZERO_FAILER_SAVED candidate_0117155 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0117155
+PASSER_SAVED candidate_0117155 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0117155
+RESULT candidate_0117155 candidate_id=117156 status=REPORT gate_status=PASS fail=0 very_suspicious=0 suspicious=0 mildly_suspicious=2 unusual=1 total_results=46
+RESULT candidate_0117225 candidate_id=117226 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=2 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0117535 candidate_id=117536 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=1 total_results=46
+RESULT candidate_0118308 candidate_id=118309 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=2 unusual=0 total_results=46
+RESULT candidate_0118474 candidate_id=118475 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=2 mildly_suspicious=0 unusual=5 total_results=46
+RESULT candidate_0118511 candidate_id=118512 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=0 unusual=2 total_results=46
+ZERO_FAILER_SAVED candidate_0118739 dir=secret_34_outputs_retry/ladder_zero_failers_00001_b/candidate_0118739
+PASSER_SAVED candidate_0118739 dir=secret_34_outputs_retry/ladder_passers_00001_b/candidate_0118739
+RESULT candidate_0118739 candidate_id=118740 status=REPORT gate_status=PASS fail=0 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0119046 candidate_id=119047 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=5 suspicious=0 mildly_suspicious=2 unusual=3 total_results=46
+RESULT candidate_0119297 candidate_id=119298 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0119454 candidate_id=119455 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0119904 candidate_id=119905 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=1 suspicious=1 mildly_suspicious=1 unusual=2 total_results=46
+RESULT candidate_0120142 candidate_id=120143 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=1 mildly_suspicious=0 unusual=0 total_results=46
+RESULT candidate_0120254 candidate_id=120255 status=REPORT gate_status=TOO_MANY_FAIL fail=5 very_suspicious=6 suspicious=1 mildly_suspicious=1 unusual=0 total_results=46
+RESULT candidate_0120356 candidate_id=120357 status=REPORT gate_status=TOO_MANY_FAIL fail=6 very_suspicious=0 suspicious=1 mildly_suspicious=1 unusual=3 total_results=46
+RESULT candidate_0120425 candidate_id=120426 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=2 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+RESULT candidate_0120477 candidate_id=120478 status=REPORT gate_status=TOO_MANY_FAIL fail=3 very_suspicious=1 suspicious=0 mildly_suspicious=0 unusual=2 total_results=46
+RESULT candidate_0121112 candidate_id=121113 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=0 suspicious=0 mildly_suspicious=0 unusual=4 total_results=46
+RESULT candidate_0122122 candidate_id=122123 status=REPORT gate_status=TOO_MANY_FAIL fail=2 very_suspicious=0 suspicious=0 mildly_suspicious=4 unusual=5 total_results=46
+RESULT candidate_0122581 candidate_id=122582 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=2 suspicious=0 mildly_suspicious=1 unusual=4 total_results=46
+RESULT candidate_0123144 candidate_id=123145 status=REPORT gate_status=TOO_MANY_FAIL fail=4 very_suspicious=3 suspicious=0 mildly_suspicious=0 unusual=1 total_results=46
+summary_csv=secret_34_outputs_retry/workspace/summary_practrand_b_034BLK.csv
+passed_candidates=secret_34_outputs_retry/workspace/passed_candidates_practrand_b_034BLK.txt
+failed_candidates=secret_34_outputs_retry/workspace/failed_candidates_practrand_b_034BLK.txt
+zero_fail_candidates=secret_34_outputs_retry/workspace/zero_fail_candidates_practrand_b_034BLK.txt
+passers_dir=secret_34_outputs_retry/ladder_passers_00001_b
+zero_failers_dir=secret_34_outputs_retry/ladder_zero_failers_00001_b

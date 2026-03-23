@@ -1,0 +1,73 @@
+NIST STS cat test results
+source_password=cat
+stream_bits=1000000
+runs=64
+summary_csv=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/nist_summary.csv
+results_root=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs
+
+Sorted by fewest fail rows, then most pass rows:
+
+candidate_index=3 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_03/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=5 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_05/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=6 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_06/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=7 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_07/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=18 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_18/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=28 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_28/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=30 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_30/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=39 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_39/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=59 pass_rows=188 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_59/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=2 pass_rows=162 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_02/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=24 pass_rows=162 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_24/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=41 pass_rows=162 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_41/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=56 pass_rows=162 fail_rows=0 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_56/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=1 pass_rows=187 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_01/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=10 pass_rows=187 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_10/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=36 pass_rows=187 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_36/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=45 pass_rows=187 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_45/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=55 pass_rows=187 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_55/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=13 pass_rows=161 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_13/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=14 pass_rows=161 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_14/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=46 pass_rows=161 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_46/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=49 pass_rows=161 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_49/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=57 pass_rows=161 fail_rows=1 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_57/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=0 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_00/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=8 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_08/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=9 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_09/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=12 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_12/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=16 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_16/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=19 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_19/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=25 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_25/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=26 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_26/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=29 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_29/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=33 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_33/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=37 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_37/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=40 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_40/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=42 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_42/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=52 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_52/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=53 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_53/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=61 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_61/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=63 pass_rows=186 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_63/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=4 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_04/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=20 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_20/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=31 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_31/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=34 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_34/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=38 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_38/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=44 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_44/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=50 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_50/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=58 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_58/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=62 pass_rows=160 fail_rows=2 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_62/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=21 pass_rows=185 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_21/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=22 pass_rows=185 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_22/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=43 pass_rows=185 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_43/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=48 pass_rows=185 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_48/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=51 pass_rows=185 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_51/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=11 pass_rows=159 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_11/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=23 pass_rows=159 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_23/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=32 pass_rows=159 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_32/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=47 pass_rows=159 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_47/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=54 pass_rows=159 fail_rows=3 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_54/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=15 pass_rows=184 fail_rows=4 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_15/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=17 pass_rows=184 fail_rows=4 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_17/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=35 pass_rows=184 fail_rows=4 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_35/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=60 pass_rows=184 fail_rows=4 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_60/AlgorithmTesting/finalAnalysisReport.txt
+candidate_index=27 pass_rows=182 fail_rows=6 final_report=/Users/magneto/Desktop/Codex Playground/Twist/generated/nist_cat_runs/candidate_index_27/AlgorithmTesting/finalAnalysisReport.txt

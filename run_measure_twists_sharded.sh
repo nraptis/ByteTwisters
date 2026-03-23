@@ -11,11 +11,14 @@ INPUT_SUITE_OVERRIDE="${INPUT_SUITE:-stale}"
 LENGTH_FACTOR_OVERRIDE="${LENGTH_FACTOR:-}"
 STREAM_BYTES_OVERRIDE="${STREAM_BYTES:-}"
 TRIAL_COUNT_OVERRIDE="${TRIAL_COUNT:-}"
-CYCLE_BLOCK_COUNT_OVERRIDE="${CYCLE_BLOCK_COUNT:-}"
 SAMPLE_WINDOWS_OVERRIDE="${SAMPLE_WINDOWS:-}"
 SIGNATURE_BYTES_OVERRIDE="${SIGNATURE_BYTES:-}"
 AVALANCHE_BLOCKS_OVERRIDE="${AVALANCHE_BLOCKS:-}"
 AVALANCHE_TRIALS_OVERRIDE="${AVALANCHE_TRIALS:-}"
+BIC_SAMPLE_BITS_OVERRIDE="${BIC_SAMPLE_BITS:-}"
+SECOND_ORDER_TRIALS_OVERRIDE="${SECOND_ORDER_TRIALS:-}"
+CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE="${CROSS_INPUT_SIGNATURE_BYTES:-}"
+TRIAL_CAP_PER_CATEGORY_OVERRIDE="${TRIAL_CAP_PER_CATEGORY:-}"
 LONG_REPEAT_BYTES_OVERRIDE="${LONG_REPEAT_BYTES:-}"
 LONG_REPEAT_TOP_OVERRIDE="${LONG_REPEAT_TOP:-}"
 LONG_REPEAT_WINDOW_A_OVERRIDE="${LONG_REPEAT_WINDOW_A:-}"
@@ -25,6 +28,7 @@ RESUME_MODE="${RESUME_MODE:-1}"
 KEEP_SHARDS="${KEEP_SHARDS:-1}"
 FAST_SHARD_MODE="${FAST_SHARD_MODE:-1}"
 SHARD_LONG_REPEAT_TOP_OVERRIDE="${SHARD_LONG_REPEAT_TOP:-}"
+START_SHARD_INDEX="${START_SHARD_INDEX:-0}"
 
 INPUT_CPP="generated/twist_candidates_generated_verbose.cpp"
 INDEX_PATH="generated/shards_index.json"
@@ -41,6 +45,26 @@ fi
 if [[ "${RESUME_MODE}" != "1" ]]; then
   rm -rf build/shards "${SHARD_CPP_DIR}" "${SHARD_OUTPUT_DIR}" "${INDEX_PATH}"
 fi
+
+if [[ "${RESUME_MODE}" == "1" && -f "${INDEX_PATH}" && "${INPUT_CPP}" -nt "${INDEX_PATH}" ]]; then
+  echo "generated input is newer than shard index; rebuilding shards"
+  rm -rf build/shards "${SHARD_CPP_DIR}" "${SHARD_OUTPUT_DIR}" "${INDEX_PATH}"
+fi
+
+if [[ "${RESUME_MODE}" == "1" && -f "${INDEX_PATH}" ]]; then
+  EXISTING_SHARD_SIZE="$(python3 - <<PY
+import json
+from pathlib import Path
+index = json.loads(Path("${INDEX_PATH}").read_text(encoding="utf-8"))
+print(index.get("shard_size", ""))
+PY
+)"
+  if [[ "${EXISTING_SHARD_SIZE}" != "${SHARD_SIZE_OVERRIDE}" ]]; then
+    echo "requested shard size differs from shard index (${SHARD_SIZE_OVERRIDE} vs ${EXISTING_SHARD_SIZE}); rebuilding shards"
+    rm -rf build/shards "${SHARD_CPP_DIR}" "${SHARD_OUTPUT_DIR}" "${INDEX_PATH}"
+  fi
+fi
+
 mkdir -p build/shards "${SHARD_CPP_DIR}" "${SHARD_OUTPUT_DIR}"
 
 if [[ -n "${SEED_OVERRIDE}" ]]; then
@@ -71,10 +95,54 @@ echo "seed=${RUN_SEED}"
 echo "shard_size=${SHARD_SIZE_OVERRIDE}"
 echo "resume_mode=${RESUME_MODE}"
 echo "fast_shard_mode=${FAST_SHARD_MODE}"
+echo "start_shard_index=${START_SHARD_INDEX}"
 
 if [[ "${FAST_SHARD_MODE}" == "1" && -z "${SHARD_LONG_REPEAT_TOP_OVERRIDE}" ]]; then
   SHARD_LONG_REPEAT_TOP_OVERRIDE="0"
 fi
+
+if [[ "${FAST_SHARD_MODE}" == "1" ]]; then
+  if [[ -z "${LENGTH_FACTOR_OVERRIDE}" ]]; then
+    LENGTH_FACTOR_OVERRIDE="4096"
+  fi
+  if [[ -z "${TRIAL_CAP_PER_CATEGORY_OVERRIDE}" ]]; then
+    TRIAL_CAP_PER_CATEGORY_OVERRIDE="1"
+  fi
+  if [[ -z "${SAMPLE_WINDOWS_OVERRIDE}" ]]; then
+    SAMPLE_WINDOWS_OVERRIDE="32768"
+  fi
+  if [[ -z "${SIGNATURE_BYTES_OVERRIDE}" ]]; then
+    SIGNATURE_BYTES_OVERRIDE="2048"
+  fi
+  if [[ -z "${AVALANCHE_BLOCKS_OVERRIDE}" ]]; then
+    AVALANCHE_BLOCKS_OVERRIDE="12"
+  fi
+  if [[ -z "${AVALANCHE_TRIALS_OVERRIDE}" ]]; then
+    AVALANCHE_TRIALS_OVERRIDE="2"
+  fi
+  if [[ -z "${BIC_SAMPLE_BITS_OVERRIDE}" ]]; then
+    BIC_SAMPLE_BITS_OVERRIDE="64"
+  fi
+  if [[ -z "${SECOND_ORDER_TRIALS_OVERRIDE}" ]]; then
+    SECOND_ORDER_TRIALS_OVERRIDE="2"
+  fi
+  if [[ -z "${CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE}" ]]; then
+    CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE="1024"
+  fi
+  if [[ -z "${TOP_N_OVERRIDE}" ]]; then
+    TOP_N_OVERRIDE="8"
+  fi
+fi
+
+echo "effective_length_factor=${LENGTH_FACTOR_OVERRIDE:-default}"
+echo "effective_trial_cap_per_category=${TRIAL_CAP_PER_CATEGORY_OVERRIDE:-full}"
+echo "effective_sample_windows=${SAMPLE_WINDOWS_OVERRIDE:-default}"
+echo "effective_signature_bytes=${SIGNATURE_BYTES_OVERRIDE:-default}"
+echo "effective_avalanche_blocks=${AVALANCHE_BLOCKS_OVERRIDE:-default}"
+echo "effective_avalanche_trials=${AVALANCHE_TRIALS_OVERRIDE:-default}"
+echo "effective_bic_sample_bits=${BIC_SAMPLE_BITS_OVERRIDE:-default}"
+echo "effective_second_order_trials=${SECOND_ORDER_TRIALS_OVERRIDE:-default}"
+echo "effective_cross_input_signature_bytes=${CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE:-default}"
 
 if [[ "${RESUME_MODE}" != "1" || ! -f "${INDEX_PATH}" ]]; then
   python3 tools/split_twist_candidates.py \
@@ -101,10 +169,17 @@ CURRENT_SHARD=0
 
 for SHARD_SOURCE in "${SHARD_SOURCES[@]}"; do
   CURRENT_SHARD=$((CURRENT_SHARD + 1))
+  SHARD_INDEX=$((CURRENT_SHARD - 1))
   SHARD_NAME="$(basename "${SHARD_SOURCE}" .cpp)"
   SHARD_BUILD="build/shards/${SHARD_NAME}"
   SHARD_OUTPUT="${SHARD_OUTPUT_DIR}/${SHARD_NAME}"
   SHARD_DONE_FILE="${SHARD_OUTPUT}/twist_candidate_scores.csv"
+
+  if (( SHARD_INDEX < START_SHARD_INDEX )); then
+    echo
+    echo "[${CURRENT_SHARD}/${TOTAL_SHARDS}] skipping ${SHARD_NAME} (before start_shard_index=${START_SHARD_INDEX})"
+    continue
+  fi
 
   if [[ "${RESUME_MODE}" == "1" && -f "${SHARD_DONE_FILE}" ]]; then
     echo
@@ -117,7 +192,10 @@ for SHARD_SOURCE in "${SHARD_SOURCES[@]}"; do
   clang++ -std=c++20 -O2 -I./src \
     ./src/TwistCandidateHarness.cpp \
     ./src/BaselineCandidates.cpp \
+    ./src/PasswordExpander.cpp \
     ./src/LightningMatrix.cpp \
+    ./src/HurricaneMatrix.cpp \
+    ./src/TyphoonMatrix.cpp \
     "${SHARD_SOURCE}" \
     ./references/AESCounter.cpp \
     ./references/ARIA256Counter.cpp \
@@ -143,8 +221,8 @@ for SHARD_SOURCE in "${SHARD_SOURCES[@]}"; do
     HARNESS_ARGS+=(--trial-count "${TRIAL_COUNT_OVERRIDE}")
   fi
 
-  if [[ -n "${CYCLE_BLOCK_COUNT_OVERRIDE}" ]]; then
-    HARNESS_ARGS+=(--cycle-block-count "${CYCLE_BLOCK_COUNT_OVERRIDE}")
+  if [[ -n "${TRIAL_CAP_PER_CATEGORY_OVERRIDE}" ]]; then
+    HARNESS_ARGS+=(--trial-cap-per-category "${TRIAL_CAP_PER_CATEGORY_OVERRIDE}")
   fi
 
   if [[ -n "${SAMPLE_WINDOWS_OVERRIDE}" ]]; then
@@ -161,6 +239,18 @@ for SHARD_SOURCE in "${SHARD_SOURCES[@]}"; do
 
   if [[ -n "${AVALANCHE_TRIALS_OVERRIDE}" ]]; then
     HARNESS_ARGS+=(--avalanche-trials "${AVALANCHE_TRIALS_OVERRIDE}")
+  fi
+
+  if [[ -n "${BIC_SAMPLE_BITS_OVERRIDE}" ]]; then
+    HARNESS_ARGS+=(--bic-sample-bits "${BIC_SAMPLE_BITS_OVERRIDE}")
+  fi
+
+  if [[ -n "${SECOND_ORDER_TRIALS_OVERRIDE}" ]]; then
+    HARNESS_ARGS+=(--second-order-trials "${SECOND_ORDER_TRIALS_OVERRIDE}")
+  fi
+
+  if [[ -n "${CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE}" ]]; then
+    HARNESS_ARGS+=(--cross-input-signature-bytes "${CROSS_INPUT_SIGNATURE_BYTES_OVERRIDE}")
   fi
 
   if [[ -n "${LONG_REPEAT_BYTES_OVERRIDE}" ]]; then

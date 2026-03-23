@@ -1,0 +1,11 @@
+{
+  "candidate_id": 31117,
+  "candidate_ordinal": 31116,
+  "candidate_folder_name": "candidate_0031116",
+  "function_name": "TwistCandidate_31117",
+  "source_shard": "/Users/magneto/Desktop/Codex Playground/Twist/generated/shards_cpp/shard_0003.cpp",
+  "source_shard_name": "shard_0003",
+  "source_local_index": 1116,
+  "source_index": "/Users/magneto/Desktop/Codex Playground/Twist/generated/shards_index.json",
+  "bundle_dir": "/Users/magneto/Desktop/Codex Playground/Twist/generated/candidates/candidate_0031116"
+}
