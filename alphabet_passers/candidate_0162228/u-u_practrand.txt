@@ -1,0 +1,17 @@
+RNG_test using PractRand version 0.96
+RNG = RNG_stdin8, seed = unknown
+test set = core, folding = standard (8 bit)
+
+rng=RNG_stdin8, seed=unknown
+length= 255.000 kilobytes (2^17.994 bytes), time= 0.0 seconds
+  Test Name                         Raw       Processed     Evaluation       
+  BCFN(2+2,13-9U)                   R= +11.6  p =  1.0e-3   unusual          
+  BCFN(2+4,13-9U)                   R= +21.2  p =  6.6e-6   mildly suspicious
+  FPF/16:(0,14-5)                   R=  +7.2  p =  7.9e-6   unusual          
+  FPF/16:(1,14-6)                   R=  +8.4  p =  1.9e-6   unusual          
+  FPF/16:all                        R= +13.4  p =  1.2e-10   VERY SUSPICIOUS 
+  FPF/16:cross                      R=  +5.8  p =  8.7e-5   mildly suspicious
+  [Low1/8]BCFN(2+0,13-9U)           R= +22.7  p =  3.1e-6   suspicious       
+  [Low1/8]DC6-9x1Bytes-1            R=  +5.5  p =  7.9e-3   unusual          
+  ...and 38 test result(s) without anomalies
+

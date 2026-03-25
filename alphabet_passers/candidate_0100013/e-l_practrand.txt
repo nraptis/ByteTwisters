@@ -1,0 +1,11 @@
+RNG_test using PractRand version 0.96
+RNG = RNG_stdin8, seed = unknown
+test set = core, folding = standard (8 bit)
+
+rng=RNG_stdin8, seed=unknown
+length= 255.000 kilobytes (2^17.994 bytes), time= 0.0 seconds
+  Test Name                         Raw       Processed     Evaluation       
+  FPF/16:(0,14-5)                   R= +14.4  p =  8.2e-12   VERY SUSPICIOUS 
+  FPF/16:all                        R= +12.0  p =  1.4e-9    VERY SUSPICIOUS 
+  ...and 44 test result(s) without anomalies
+

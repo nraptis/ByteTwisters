@@ -83,19 +83,19 @@ inline void ApplyLightningMixColumns(
             : ((mix_variant == 1U)
                    ? (column * 3U + 5U)
                    : ((mix_variant == 2U) ? (column * 5U + 9U) : (column * 7U + 11U))));
-    std::uint8_t value0 = FixedSBoxByte(static_cast<unsigned char>(
+    std::uint8_t value0 = FixedMixBoxByte(static_cast<unsigned char>(
         bytes[read_column] ^
         salt[(salt_offset + salt_skew) & 31U] ^
         static_cast<unsigned char>(rule + column + mix_variant)));
-    std::uint8_t value1 = FixedSBoxByte(static_cast<unsigned char>(
+    std::uint8_t value1 = FixedMixBoxByte(static_cast<unsigned char>(
         bytes[4U + read_column] ^
         salt[(salt_offset + salt_skew + 5U + mix_variant) & 31U] ^
         static_cast<unsigned char>(rule + 17U + mix_variant * 3U)));
-    std::uint8_t value2 = FixedSBoxByte(static_cast<unsigned char>(
+    std::uint8_t value2 = FixedMixBoxByte(static_cast<unsigned char>(
         bytes[8U + read_column] ^
         salt[(salt_offset + salt_skew + 11U + mix_variant) & 31U] ^
         static_cast<unsigned char>(rule + 29U + mix_variant * 5U)));
-    std::uint8_t value3 = FixedSBoxByte(static_cast<unsigned char>(
+    std::uint8_t value3 = FixedMixBoxByte(static_cast<unsigned char>(
         bytes[12U + read_column] ^
         salt[(salt_offset + salt_skew + 19U + mix_variant) & 31U] ^
         static_cast<unsigned char>(rule + 43U + mix_variant * 7U)));
@@ -112,7 +112,7 @@ inline void ApplyLightningMixColumns(
       value3 = static_cast<std::uint8_t>(value2 ^ RotateLeft8(rule, 1U));
       value2 = temp;
     } else if (mix_variant == 3U) {
-      value0 = static_cast<std::uint8_t>(value0 ^ FixedSBoxByte(static_cast<unsigned char>(value2 + rule)));
+      value0 = static_cast<std::uint8_t>(value0 ^ FixedMixBoxByte(static_cast<unsigned char>(value2 + rule)));
       value1 = static_cast<std::uint8_t>(value1 + GfDouble(value3));
       value2 = static_cast<std::uint8_t>(value2 ^ RotateLeft8(value0, 1U));
       value3 = static_cast<std::uint8_t>(value3 + RotateLeft8(value1, 3U));
@@ -197,14 +197,14 @@ inline void ApplySaltSBoxLayer(
         static_cast<std::uint32_t>(salt[(index + 7U) & 31U]) ^ static_cast<std::uint32_t>(index * 17U),
         0x9E3779B9u + static_cast<std::uint32_t>(index * 0x45D9F3Bu),
         5U + ((rotate + static_cast<unsigned>(index)) & 7U));
-    const unsigned char wave = FixedSBoxByte(static_cast<unsigned char>(
+    const unsigned char wave = FixedMixBoxByte(static_cast<unsigned char>(
         FoldWordToByte(state) ^
         salt[index] ^
         salt[(index + 13U) & 31U] ^
         static_cast<unsigned char>(bias + static_cast<std::uint32_t>(index * 29U))));
     salt[index] = static_cast<unsigned char>(
         RotateLeft8(static_cast<std::uint8_t>(salt[index] + wave), (rotate + static_cast<unsigned>(index)) & 7U) ^
-        FixedSBoxByte(static_cast<unsigned char>(wave + salt[(index + 3U) & 31U])));
+        FixedMixBoxByte(static_cast<unsigned char>(wave + salt[(index + 3U) & 31U])));
   }
 }
 
@@ -222,7 +222,7 @@ inline std::uint32_t AdvanceSaltSeedAccumulator(
   const std::uint32_t rotated_b =
       static_cast<std::uint32_t>(RotateLeft8(static_cast<std::uint8_t>(value_b & 0xFFU), rotate));
   const std::uint32_t nonlinear =
-      static_cast<std::uint32_t>(FixedSBoxByte(static_cast<unsigned char>((value_a + bias + lane) ^ rotated_b)));
+      static_cast<std::uint32_t>(FixedMixBoxByte(static_cast<unsigned char>((value_a + bias + lane) ^ rotated_b)));
   accumulator = AdvanceTwiddle32(
       accumulator ^ static_cast<std::uint32_t>(salt[(lane_index + 11U) & 31U]),
       nonlinear ^ value_a,
@@ -230,14 +230,14 @@ inline std::uint32_t AdvanceSaltSeedAccumulator(
       bias * 0x45D9F3Bu + 0x27D4EB2Du,
       11U + (rotate & 7U));
   const unsigned char folded = FoldWordToByte(accumulator);
-  const unsigned char mix = FixedSBoxByte(static_cast<unsigned char>(
+  const unsigned char mix = FixedMixBoxByte(static_cast<unsigned char>(
       folded ^ static_cast<unsigned char>(nonlinear) ^ salt[lane_index] ^ salt[(lane_index + 7U) & 31U]));
   if (xor_mode) {
     salt[lane_index] ^= mix;
   } else {
     salt[lane_index] = static_cast<unsigned char>(salt[lane_index] + mix);
   }
-  salt[(lane_index + 11U) & 31U] ^= FixedSBoxByte(static_cast<unsigned char>(mix + folded + (lane & 0xFFU)));
+  salt[(lane_index + 11U) & 31U] ^= FixedMixBoxByte(static_cast<unsigned char>(mix + folded + (lane & 0xFFU)));
   return accumulator;
 }
 
@@ -345,13 +345,13 @@ inline unsigned char FoldRecipeSourceLane(
     mixed ^= RotateLeft8(source_blocks[1][(lane + recipe.mixlane_a) & 15U], 1U + (recipe.index_mode & 1U));
   }
   if constexpr (SourceCount > 2U) {
-    mixed = FixedSBoxByte(static_cast<unsigned char>(
+    mixed = FixedMixBoxByte(static_cast<unsigned char>(
         mixed +
         source_blocks[2][(lane + recipe.mixlane_b) & 15U] +
         recipe.fast_rule));
   }
   if constexpr (SourceCount > 3U) {
-    mixed ^= FixedSBoxByte(static_cast<unsigned char>(
+    mixed ^= FixedMixBoxByte(static_cast<unsigned char>(
         source_blocks[3][(lane + recipe.mixlane_a + recipe.mixlane_b) & 15U] ^
         recipe.slow_rule));
   }
@@ -434,7 +434,7 @@ inline std::array<unsigned char, kMatrixBlockBytes> BuildRecipeMatrixBytes(
             : ((role == 1U) ? lane_b_byte : ((role == 2U) ? key_byte : partner_byte));
         break;
       case 1U:
-        bytes[lane] = FixedSBoxByte(static_cast<unsigned char>(
+        bytes[lane] = FixedMixBoxByte(static_cast<unsigned char>(
             lane_a_byte ^
             RotateLeft8(partner_byte, role + 1U) ^
             control_byte ^
@@ -449,7 +449,7 @@ inline std::array<unsigned char, kMatrixBlockBytes> BuildRecipeMatrixBytes(
         break;
       default:
         bytes[lane] = static_cast<unsigned char>(
-            FixedSBoxByte(static_cast<unsigned char>(key_byte ^ mask_b_byte ^ source_mix)) ^
+            FixedMixBoxByte(static_cast<unsigned char>(key_byte ^ mask_b_byte ^ source_mix)) ^
             RotateLeft8(control_byte, role + 1U) ^
             partner_byte ^
             mask_a_byte);
@@ -653,7 +653,7 @@ inline void ApplyDualWorkerMatrixBreakerImpl(
 
     for (std::size_t lane = 0; lane < kMatrixBlockBytes; ++lane) {
       const unsigned char source_feedback = FoldRecipeSourceLane(source_blocks, lane, recipe);
-      const unsigned char feedback = FixedSBoxByte(static_cast<unsigned char>(
+      const unsigned char feedback = FixedMixBoxByte(static_cast<unsigned char>(
           source_feedback ^
           control[(lane + recipe.mixlane_b) & 15U] ^
           key[(lane + 3U) & 15U] ^
@@ -749,7 +749,7 @@ inline void ApplyFinalWhitening(
         twiddle_b ^ static_cast<std::uint32_t>(i * 13U),
         0x165667B1u,
         9U);
-    const unsigned char wave = FixedSBoxByte(static_cast<unsigned char>(
+    const unsigned char wave = FixedMixBoxByte(static_cast<unsigned char>(
         FoldWordToByte(acc) ^ dest[i] ^ salt[(i + ((acc >> 27U) & 31U)) & 31U]));
     dest[i] ^= wave;
   }

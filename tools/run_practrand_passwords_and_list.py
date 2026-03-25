@@ -35,6 +35,11 @@ def sanitize_password_label(password: str) -> str:
     return label or "blank"
 
 
+def case_signature(password: str) -> str:
+    signature = "".join("u" if char.isupper() else "l" for char in password if char.isalpha())
+    return signature or "plain"
+
+
 def build_password_entries(passwords: list[str]) -> list[tuple[str, str]]:
     slugs = [sanitize_password_label(password) for password in passwords]
     slug_counts: dict[str, int] = {}
@@ -42,12 +47,19 @@ def build_password_entries(passwords: list[str]) -> list[tuple[str, str]]:
         slug_counts[slug] = slug_counts.get(slug, 0) + 1
 
     entries: list[tuple[str, str]] = []
+    used_labels: dict[str, int] = {}
     for index, password in enumerate(passwords, start=1):
         slug = slugs[index - 1]
         if slug_counts[slug] == 1:
             label = slug
         else:
-            label = f"{index:05d}_{slug}"
+            base_label = f"{slug}-{case_signature(password)}"
+            used_count = used_labels.get(base_label, 0)
+            if used_count > 0:
+                label = f"{base_label}-{used_count + 1}"
+            else:
+                label = base_label
+            used_labels[base_label] = used_count + 1
         entries.append((password, label))
     return entries
 

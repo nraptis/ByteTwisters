@@ -2037,71 +2037,71 @@ def render_scalar_loop_body(spec: dict[str, Any], target_array: str) -> list[str
     mul_b = spec["mul_b"]
     template = spec["template"]
     key_term = maybe_plain(
-        "key_byte",
-        f"((key_byte + {spec['key_const']}u) & 0xFFu)",
+        "aKeyByte",
+        f"((aKeyByte + {spec['key_const']}u) & 0xFFu)",
         spec["plain_key"],
     )
     salt_term = maybe_plain(
-        "salt_byte",
-        f"(salt_byte ^ {spec['salt_const']}u)",
+        "aSaltByte",
+        f"(aSaltByte ^ {spec['salt_const']}u)",
         spec["plain_salt"],
     )
     twiddle_term = maybe_plain(
-        "twiddle_byte",
-        f"(((twiddle_byte << {spec['twiddle_shift']}u) | (twiddle_byte >> {8 - spec['twiddle_shift']}u)) & 0xFFu)",
+        "aTwiddleByte",
+        f"(((aTwiddleByte << {spec['twiddle_shift']}u) | (aTwiddleByte >> {8 - spec['twiddle_shift']}u)) & 0xFFu)",
         spec["plain_twiddle"],
     )
     feedback_term = maybe_plain(
-        "feedback_byte",
-        f"((feedback_byte + {spec['feedback_term_const']}u) & 0xFFu)",
+        "aFeedbackByte",
+        f"((aFeedbackByte + {spec['feedback_term_const']}u) & 0xFFu)",
         spec["plain_feedback"],
     )
     lines = [
         "  {",
-        "    const int start = 0;",
-        "    const int end = static_cast<int>(PASSWORD_EXPANDED_SIZE);",
-        f"    std::uint32_t lane_state = aTwiddle ^ 0x{spec['feedback_seed']:08X}u ^ static_cast<std::uint32_t>({abs(offset_a + offset_b + offset_c)}u);",
-        "    for (int i = start; i < end; ++i) {",
-        f"      const int index1 = WrapRange(i + ({offset_a}), start, end);",
-        f"      const std::uint32_t a = static_cast<std::uint32_t>({input_a_cpp}[index1]);",
-        "      const std::uint32_t key_byte = static_cast<std::uint32_t>(KeyStackByte(",
+        "    const int aStart = 0;",
+        "    const int aEnd = static_cast<int>(PASSWORD_EXPANDED_SIZE);",
+        f"    std::uint32_t aLaneState = aTwiddle ^ 0x{spec['feedback_seed']:08X}u ^ static_cast<std::uint32_t>({abs(offset_a + offset_b + offset_c)}u);",
+        "    for (int i = aStart; i < aEnd; ++i) {",
+        f"      const int aIndex1 = WrapRange(i + ({offset_a}), aStart, aEnd);",
+        f"      const std::uint32_t a = static_cast<std::uint32_t>({input_a_cpp}[aIndex1]);",
+        "      const std::uint32_t aKeyByte = static_cast<std::uint32_t>(KeyStackByte(",
         "          pKeyStack,",
         f"          static_cast<std::size_t>((pRound + {spec['key_row']}u + static_cast<unsigned int>(i)) & 15U),",
         f"          static_cast<std::size_t>(i + {spec['key_offset']}u)));",
-        f"      const std::uint32_t salt_byte = static_cast<std::uint32_t>(pSalt[(static_cast<unsigned int>(i) + {spec['salt_offset']}u) & 31U]);",
-        "      const std::uint32_t twiddle_byte = static_cast<std::uint32_t>("
+        f"      const std::uint32_t aSaltByte = static_cast<std::uint32_t>(pSalt[(static_cast<unsigned int>(i) + {spec['salt_offset']}u) & 31U]);",
+        "      const std::uint32_t aTwiddleByte = static_cast<std::uint32_t>("
         "          (aTwiddle >> (((static_cast<unsigned int>(i) + pRound) & 3U) * 8U)) & 0xFFu);",
-        "      const std::uint32_t feedback_byte = static_cast<std::uint32_t>("
-        "          (lane_state >> (((static_cast<unsigned int>(i) ^ pRound) & 3U) * 8U)) & 0xFFu);",
+        "      const std::uint32_t aFeedbackByte = static_cast<std::uint32_t>("
+        "          (aLaneState >> (((static_cast<unsigned int>(i) ^ pRound) & 3U) * 8U)) & 0xFFu);",
     ]
     if data_index_count >= 2:
         if spec["chained_indices"]:
             lines.extend(
                 [
-                    f"      const int index2 = WrapRange(i + ({offset_b}) + static_cast<int>(a), start, end);",
-                    f"      const std::uint32_t b = static_cast<std::uint32_t>({input_b_cpp}[index2]);",
+                    f"      const int aIndex2 = WrapRange(i + ({offset_b}) + static_cast<int>(a), aStart, aEnd);",
+                    f"      const std::uint32_t b = static_cast<std::uint32_t>({input_b_cpp}[aIndex2]);",
                 ]
             )
         else:
             lines.extend(
                 [
-                    f"      const int index2 = WrapRange(i + ({offset_b}), start, end);",
-                    f"      const std::uint32_t b = static_cast<std::uint32_t>({input_b_cpp}[index2]);",
+                    f"      const int aIndex2 = WrapRange(i + ({offset_b}), aStart, aEnd);",
+                    f"      const std::uint32_t b = static_cast<std::uint32_t>({input_b_cpp}[aIndex2]);",
                 ]
             )
     if data_index_count >= 3:
         if spec["chained_indices"]:
             lines.extend(
                 [
-                    f"      const int index3 = WrapRange(i + ({offset_c}) - static_cast<int>(b), start, end);",
-                    f"      const std::uint32_t c = static_cast<std::uint32_t>({input_c_cpp}[index3]);",
+                    f"      const int aIndex3 = WrapRange(i + ({offset_c}) - static_cast<int>(b), aStart, aEnd);",
+                    f"      const std::uint32_t c = static_cast<std::uint32_t>({input_c_cpp}[aIndex3]);",
                 ]
             )
         else:
             lines.extend(
                 [
-                    f"      const int index3 = WrapRange(i + ({offset_c}), start, end);",
-                    f"      const std::uint32_t c = static_cast<std::uint32_t>({input_c_cpp}[index3]);",
+                    f"      const int aIndex3 = WrapRange(i + ({offset_c}), aStart, aEnd);",
+                    f"      const std::uint32_t c = static_cast<std::uint32_t>({input_c_cpp}[aIndex3]);",
                 ]
             )
 
@@ -2213,27 +2213,27 @@ def render_scalar_loop_body(spec: dict[str, Any], target_array: str) -> list[str
 
     if spec["twiddle_mode"] == "xor":
         lines.append(
-            f"      aTwiddle = RotateLeft32(aTwiddle ^ (value + key_byte + salt_byte + {spec['twiddle_const']}u), {spec['twiddle_rotate']}u);"
+            f"      aTwiddle = RotateLeft32(aTwiddle ^ (value + aKeyByte + aSaltByte + {spec['twiddle_const']}u), {spec['twiddle_rotate']}u);"
         )
     elif spec["twiddle_mode"] == "add":
         lines.append(
-            f"      aTwiddle = RotateLeft32(aTwiddle + (value ^ twiddle_byte ^ {spec['twiddle_const']}u), {spec['twiddle_rotate']}u);"
+            f"      aTwiddle = RotateLeft32(aTwiddle + (value ^ aTwiddleByte ^ {spec['twiddle_const']}u), {spec['twiddle_rotate']}u);"
         )
     else:
         lines.append(
-            f"      aTwiddle = RotateLeft32((aTwiddle ^ (value + key_byte)) + (salt_byte << 8U) + {spec['twiddle_const']}u, {spec['twiddle_rotate']}u);"
+            f"      aTwiddle = RotateLeft32((aTwiddle ^ (value + aKeyByte)) + (aSaltByte << 8U) + {spec['twiddle_const']}u, {spec['twiddle_rotate']}u);"
         )
     if spec["feedback_mode"] == "xor":
         lines.append(
-            f"      lane_state = RotateLeft32(lane_state ^ (value + twiddle_byte + {spec['feedback_const']}u), {spec['feedback_rotate']}u);"
+            f"      aLaneState = RotateLeft32(aLaneState ^ (value + aTwiddleByte + {spec['feedback_const']}u), {spec['feedback_rotate']}u);"
         )
     elif spec["feedback_mode"] == "add":
         lines.append(
-            f"      lane_state = RotateLeft32(lane_state + (value ^ key_byte ^ {spec['feedback_const']}u), {spec['feedback_rotate']}u);"
+            f"      aLaneState = RotateLeft32(aLaneState + (value ^ aKeyByte ^ {spec['feedback_const']}u), {spec['feedback_rotate']}u);"
         )
     else:
         lines.append(
-            f"      lane_state = RotateLeft32((lane_state ^ (value + feedback_byte)) + (salt_byte << 8U) + {spec['feedback_const']}u, {spec['feedback_rotate']}u);"
+            f"      aLaneState = RotateLeft32((aLaneState ^ (value + aFeedbackByte)) + (aSaltByte << 8U) + {spec['feedback_const']}u, {spec['feedback_rotate']}u);"
         )
     lines.extend(["    }", "  }"])
     return lines
@@ -2491,6 +2491,7 @@ def render_salt_seed_lines(
     spec: dict[str, Any],
     salt_name: str,
     salt_mix_box_name: str = "aSaltMixBox",
+    apply_mix_box_name: str = "ApplySaltSBoxLayer",
     var_prefix: str = "a",
 ) -> list[str]:
     _, _, offset0, offset1 = spec["seed_offsets"]
@@ -2532,7 +2533,7 @@ def render_salt_seed_lines(
         ]
     )
     lines.append(
-        f"  ApplySaltSBoxLayer({salt_name}, {salt_acc}, static_cast<std::uint32_t>({spec['round_key_bias']}u), {spec['seed_rotate']}u);"
+        f"  {apply_mix_box_name}({salt_name}, {salt_acc}, static_cast<std::uint32_t>({spec['round_key_bias']}u), {spec['seed_rotate']}u);"
     )
     lines.extend(
         [
@@ -2540,7 +2541,7 @@ def render_salt_seed_lines(
             f"    const std::uint32_t {salt_wave} = static_cast<std::uint32_t>({salt_mix_box_name}[(",
             f"        {salt_name}[aSaltLane] ^ {salt_name}[(aSaltLane + 7U) & 31U] ^ static_cast<unsigned char>({spec['round_key_bias']}u) ^ static_cast<unsigned char>(aSaltLane)) & 127U]);",
             f"    {salt_name}[aSaltLane] = static_cast<unsigned char>(",
-            f"        FixedSBoxByte(static_cast<unsigned char>({salt_name}[aSaltLane] ^ {salt_wave} ^ {salt_name}[(aSaltLane + 13U) & 31U])) +",
+            f"        FixedMixBoxByte(static_cast<unsigned char>({salt_name}[aSaltLane] ^ {salt_wave} ^ {salt_name}[(aSaltLane + 13U) & 31U])) +",
             f"        static_cast<unsigned char>({salt_wave}));",
             "  }",
         ]
@@ -2571,7 +2572,7 @@ def render_salt_seed_lines(
         )
         lines.append("  }")
         lines.append(
-            f"  ApplySaltSBoxLayer({salt_name}, {salt_acc} ^ static_cast<std::uint32_t>({spec['salt_second_bias']}u), static_cast<std::uint32_t>({spec['salt_second_bias']}u), {rotate}u);"
+            f"  {apply_mix_box_name}({salt_name}, {salt_acc} ^ static_cast<std::uint32_t>({spec['salt_second_bias']}u), static_cast<std::uint32_t>({spec['salt_second_bias']}u), {rotate}u);"
         )
         lines.extend(
             [
@@ -2583,6 +2584,249 @@ def render_salt_seed_lines(
             ]
         )
     return lines
+
+
+def render_custom_twiddle_and_salt_mix_lines(
+    function_name: str,
+    candidate_id: int,
+    spec: dict[str, Any],
+) -> list[str]:
+    salt_second_bias = int(spec.get("salt_second_bias", spec["round_key_bias"]))
+    salt_second_rotate = int(spec.get("salt_second_rotate", spec["seed_rotate"]))
+    twist_const_a = (
+        (candidate_id * 0x045D9F3B)
+        ^ (int(spec["seed_bias"]) * 0x009E3779)
+        ^ int(spec["round_key_bias"])
+    ) & 0xFFFFFFFF
+    twist_const_b = (
+        (candidate_id * 0x27D4EB2D)
+        ^ (salt_second_bias * 0x85EBCA6B)
+        ^ int(spec["seed_rotate"])
+    ) & 0xFFFFFFFF
+    twist_const_c = (
+        (twist_const_a ^ 0xA5A5A5A5)
+        + (int(spec["salt_stride"]) << 11)
+        + int(spec["seed_stride"])
+    ) & 0xFFFFFFFF
+    twist_const_d = (
+        (twist_const_b ^ 0xC3A5C85C)
+        + (int(spec.get("salt_second_stride_a", spec["salt_stride"])) << 7)
+        + int(spec.get("salt_second_stride_b", spec["seed_stride"]))
+    ) & 0xFFFFFFFF
+    rotate_a = 5 + (int(spec["seed_rotate"]) % 7)
+    rotate_b = 7 + (salt_second_rotate % 5)
+    twiddle_a_name = f"{function_name}_AdvanceTwiddle32A"
+    twiddle_b_name = f"{function_name}_AdvanceTwiddle32B"
+    salt_mix_name = f"{function_name}_ApplySaltMixBox"
+
+    return [
+        f"static std::uint32_t {twiddle_a_name}(",
+        "    std::uint32_t pState,",
+        "    std::uint32_t pValue,",
+        "    std::uint32_t pExtra) {",
+        f"  std::uint32_t aState = pState ^ 0x{twist_const_a:08X}u;",
+        "  aState = AdvanceTwiddle32(",
+        "      aState,",
+        f"      pValue ^ 0x{twist_const_c:08X}u,",
+        f"      pExtra + 0x{twist_const_b:08X}u,",
+        f"      0x{twist_const_d:08X}u,",
+        f"      {rotate_a}u);",
+        f"  aState ^= RotateLeft32(pValue + pExtra + 0x{twist_const_b ^ twist_const_c:08X}u, {1 + (rotate_b % 13)}U);",
+        f"  return static_cast<std::uint32_t>(aState + 0x{(twist_const_a ^ twist_const_d):08X}u);",
+        "}",
+        "",
+        f"static std::uint32_t {twiddle_b_name}(",
+        "    std::uint32_t pState,",
+        "    std::uint32_t pValue,",
+        "    std::uint32_t pExtra) {",
+        f"  std::uint32_t aState = pState + 0x{twist_const_b:08X}u;",
+        "  aState = AdvanceTwiddle32(",
+        "      aState ^ RotateLeft32(pExtra, 5U),",
+        f"      pValue + 0x{twist_const_d:08X}u,",
+        f"      pExtra ^ 0x{twist_const_a:08X}u,",
+        f"      0x{twist_const_c:08X}u,",
+        f"      {rotate_b}u);",
+        f"  aState ^= RotateLeft32(pValue ^ pExtra ^ 0x{(twist_const_a + twist_const_c) & 0xFFFFFFFF:08X}u, {1 + (rotate_a % 11)}U);",
+        f"  return static_cast<std::uint32_t>(aState ^ 0x{(twist_const_b ^ twist_const_d):08X}u);",
+        "}",
+        "",
+        f"static void {salt_mix_name}(",
+        "    unsigned char (&pSalt)[kSaltBytes],",
+        "    std::uint32_t pState,",
+        "    std::uint32_t pBias,",
+        "    unsigned pRotate) {",
+        f"  std::uint32_t aTwiddleA = {twiddle_a_name}(",
+        "      pState ^ pBias,",
+        "      static_cast<std::uint32_t>(pSalt[(pBias + 3U) & 31U]),",
+        "      static_cast<std::uint32_t>(pRotate + 17U));",
+        f"  std::uint32_t aTwiddleB = {twiddle_b_name}(",
+        "      pState + pBias + static_cast<std::uint32_t>(pRotate),",
+        "      static_cast<std::uint32_t>(pSalt[(pBias + 11U) & 31U]),",
+        "      static_cast<std::uint32_t>(pRotate + 29U));",
+        "  for (std::size_t aIndex = 0; aIndex < kSaltBytes; ++aIndex) {",
+        "    const unsigned char aSaltA = pSalt[aIndex];",
+        "    const unsigned char aSaltB = pSalt[(aIndex + 7U + (FoldWordToByte(aTwiddleA) & 3U)) & 31U];",
+        "    const unsigned char aSaltC = pSalt[(aIndex + 13U + (FoldWordToByte(aTwiddleB) & 3U)) & 31U];",
+        f"    aTwiddleA = {twiddle_a_name}(",
+        "        aTwiddleA ^ static_cast<std::uint32_t>(aSaltB),",
+        "        static_cast<std::uint32_t>(aSaltA) ^ pBias,",
+        "        static_cast<std::uint32_t>(aSaltC) ^ static_cast<std::uint32_t>(aIndex * 17U + pRotate));",
+        f"    aTwiddleB = {twiddle_b_name}(",
+        "        aTwiddleB ^ static_cast<std::uint32_t>(aSaltC),",
+        "        static_cast<std::uint32_t>(aSaltB) + pBias + static_cast<std::uint32_t>(aIndex * 29U),",
+        "        aTwiddleA ^ static_cast<std::uint32_t>(aIndex));",
+        "    const unsigned char aWave = FixedMixBoxByte(static_cast<unsigned char>(",
+        "        FoldWordToByte(aTwiddleA ^ RotateLeft32(aTwiddleB, 3U + ((pRotate + static_cast<unsigned>(aIndex)) & 7U))) ^",
+        "        aSaltA ^",
+        "        aSaltB ^",
+        "        static_cast<unsigned char>(pBias + static_cast<std::uint32_t>(aIndex * 19U))));",
+        "    const unsigned char aMix = FixedMixBoxByte(static_cast<unsigned char>(",
+        "        aWave ^",
+        "        aSaltC ^",
+        "        static_cast<unsigned char>(FoldWordToByte(aTwiddleB) + static_cast<unsigned char>(aIndex * 7U))));",
+        "    if (((aTwiddleA >> (aIndex & 7U)) & 1U) == 0U) {",
+        "      pSalt[aIndex] = static_cast<unsigned char>(",
+        "          RotateLeft8(static_cast<std::uint8_t>(aSaltA + aWave), (pRotate + static_cast<unsigned>(aIndex)) & 7U) ^",
+        "          aMix);",
+        "    } else {",
+        "      pSalt[aIndex] = static_cast<unsigned char>(",
+        "          RotateLeft8(static_cast<std::uint8_t>(aSaltA ^ aWave), (pRotate + static_cast<unsigned>(aIndex + 3U)) & 7U) +",
+        "          aMix);",
+        "    }",
+        "    pSalt[(aIndex + 11U + (aMix & 3U)) & 31U] ^= static_cast<unsigned char>(aWave + FoldWordToByte(aTwiddleB));",
+        "  }",
+        "}",
+    ]
+
+
+def render_custom_step_mix_pulse_lines(
+    function_name: str,
+    candidate_id: int,
+    spec: dict[str, Any],
+) -> list[str]:
+    pulse_const_a = (
+        (candidate_id * 0x165667B1)
+        ^ (int(spec["seed_bias"]) * 0x9E3779B9)
+        ^ int(spec["round_key_bias"])
+    ) & 0xFFFFFFFF
+    pulse_const_b = (
+        (candidate_id * 0xD1B54A35)
+        ^ (int(spec["salt_stride"]) * 0x85EBCA6B)
+        ^ int(spec["seed_stride"])
+    ) & 0xFFFFFFFF
+    pulse_const_c = (
+        (pulse_const_a ^ 0xC2B2AE3D)
+        + (int(spec.get("salt_second_bias", spec["round_key_bias"])) << 9)
+        + int(spec.get("salt_second_rotate", spec["seed_rotate"]))
+    ) & 0xFFFFFFFF
+    pulse_const_d = (
+        (pulse_const_b ^ 0x27D4EB2F)
+        + (int(spec["seed_rotate"]) << 11)
+        + int(spec.get("salt_second_stride_a", spec["salt_stride"]))
+    ) & 0xFFFFFFFF
+    pulse_salt_a = pulse_const_a % SALT_BYTES
+    pulse_salt_b = pulse_const_b % SALT_BYTES
+    helper_name = f"{function_name}_ApplyStepMixPulse"
+    twiddle_a_name = f"{function_name}_AdvanceTwiddle32A"
+    twiddle_b_name = f"{function_name}_AdvanceTwiddle32B"
+    return [
+        f"static void {helper_name}(",
+        "    unsigned char* pSource,",
+        "    unsigned char* pWorkerA,",
+        "    unsigned char* pWorkerB,",
+        "    const unsigned char (&pSalt)[kSaltBytes],",
+        "    unsigned int pRound,",
+        "    unsigned char (&pBreakerTempA)[kMatrixBlockBytes],",
+        "    unsigned char (&pBreakerTempB)[kMatrixBlockBytes]) {",
+        "  if (pSource == nullptr || pWorkerA == nullptr || pWorkerB == nullptr) {",
+        "    return;",
+        "  }",
+        f"  std::uint32_t aPulseA = {twiddle_a_name}(",
+        f"      0x{pulse_const_a:08X}u ^ static_cast<std::uint32_t>(pRound),",
+        f"      static_cast<std::uint32_t>(pSalt[{pulse_salt_a}U]),",
+        f"      0x{pulse_const_c:08X}u ^ static_cast<std::uint32_t>(pSalt[{pulse_salt_b}U]));",
+        f"  std::uint32_t aPulseB = {twiddle_b_name}(",
+        f"      0x{pulse_const_b:08X}u + static_cast<std::uint32_t>(pRound * 17U),",
+        f"      static_cast<std::uint32_t>(pSalt[{pulse_salt_b}U]),",
+        f"      0x{pulse_const_d:08X}u ^ static_cast<std::uint32_t>(pSalt[{pulse_salt_a}U]));",
+        "  for (std::size_t chunk = 0; chunk < PASSWORD_EXPANDED_SIZE; chunk += kMatrixBlockBytes) {",
+        "    const unsigned char aPulseByteA = FoldWordToByte(aPulseA);",
+        "    const unsigned char aPulseByteB = FoldWordToByte(aPulseB);",
+        "    const auto aSource = LoadBlock16Wrapped(pSource, chunk);",
+        "    const auto aSourcePrev = LoadBlock16Wrapped(",
+        "        pSource,",
+        "        static_cast<std::size_t>(WrapRange(",
+        "            static_cast<int>(chunk) - static_cast<int>((aPulseByteA & 7U) + 1U),",
+        "            0,",
+        "            static_cast<int>(PASSWORD_EXPANDED_SIZE))));",
+        "    const auto aSourceNext = LoadBlock16Wrapped(",
+        "        pSource,",
+        "        static_cast<std::size_t>(WrapRange(",
+        "            static_cast<int>(chunk) + static_cast<int>((aPulseByteB & 7U) + 1U),",
+        "            0,",
+        "            static_cast<int>(PASSWORD_EXPANDED_SIZE))));",
+        "    const auto aWorkerBlockA = LoadBlock16Wrapped(pWorkerA, chunk);",
+        "    const auto aWorkerBlockB = LoadBlock16Wrapped(pWorkerB, chunk);",
+        "    for (std::size_t aLane = 0; aLane < kMatrixBlockBytes; ++aLane) {",
+        "      const unsigned char aSourceStep = static_cast<unsigned char>(",
+        "          aSourceNext[(aLane + 1U + (aPulseByteA & 1U)) & 15U] -",
+        "          aSourcePrev[(aLane + 15U - (aPulseByteB & 1U)) & 15U]);",
+        "      const unsigned char aWorkerStepA = static_cast<unsigned char>(",
+        "          aWorkerBlockA[(aLane + 1U + ((aPulseByteA >> 1U) & 1U)) & 15U] ^",
+        "          aWorkerBlockA[(aLane + 15U - ((aPulseByteB >> 1U) & 1U)) & 15U]);",
+        "      const unsigned char aWorkerStepB = static_cast<unsigned char>(",
+        "          aWorkerBlockB[(aLane + 1U + ((aPulseByteB >> 2U) & 1U)) & 15U] -",
+        "          aWorkerBlockB[(aLane + 15U - ((aPulseByteA >> 2U) & 1U)) & 15U]);",
+        "      const unsigned char aWave = FixedMixBoxByte(static_cast<unsigned char>(",
+        "          aSourceStep ^",
+        "          RotateLeft8(aWorkerStepA, 1U + ((aPulseByteA + static_cast<unsigned char>(aLane)) & 3U)) ^",
+        "          RotateLeft8(aWorkerStepB, 1U + ((aPulseByteB + static_cast<unsigned char>(aLane)) & 3U)) ^",
+        "          aSource[(aLane + 3U + (aPulseByteA & 3U)) & 15U] ^",
+        f"          pSalt[(aLane + {pulse_salt_a}U + (aPulseByteB & 3U)) & 31U] ^",
+        "          aPulseByteA ^",
+        "          static_cast<unsigned char>(pRound + static_cast<unsigned int>(aLane))));",
+        "      const unsigned char aMix = FixedMixBoxByte(static_cast<unsigned char>(",
+        "          aWave +",
+        "          aWorkerBlockA[(aLane + 5U + (aPulseByteB & 1U)) & 15U] +",
+        "          RotateLeft8(aWorkerBlockB[(aLane + 9U + (aPulseByteA & 1U)) & 15U], 1U + ((aPulseByteA >> 5U) & 3U)) +",
+        f"          pSalt[(aLane + {pulse_salt_b}U + (aPulseByteA & 3U)) & 31U]));",
+        "      if (((aPulseByteA ^ aPulseByteB ^ static_cast<unsigned char>(aLane)) & 1U) == 0U) {",
+        "        pBreakerTempA[aLane] = static_cast<unsigned char>(",
+        "            aWorkerBlockA[aLane] ^",
+        "            aWave ^",
+        "            RotateLeft8(aWorkerBlockB[(aLane + (aPulseByteB & 7U)) & 15U], 1U + (aPulseByteA & 3U)));",
+        "        pBreakerTempB[aLane] = static_cast<unsigned char>(",
+        "            aWorkerBlockB[aLane] +",
+        "            aMix +",
+        "            RotateLeft8(aSource[(aLane + (aPulseByteA & 7U)) & 15U], 1U + (aPulseByteB & 3U)));",
+        "      } else {",
+        "        pBreakerTempA[aLane] = static_cast<unsigned char>(",
+        "            aWorkerBlockA[aLane] +",
+        "            aWave +",
+        "            RotateLeft8(aSource[(aLane + (aPulseByteA & 7U)) & 15U], 1U + (aPulseByteA & 3U)));",
+        "        pBreakerTempB[aLane] = static_cast<unsigned char>(",
+        "            aWorkerBlockB[aLane] ^",
+        "            aMix ^",
+        "            RotateLeft8(aWorkerBlockA[(aLane + (aPulseByteB & 7U)) & 15U], 1U + (aPulseByteB & 3U)));",
+        "      }",
+        "    }",
+        "    std::memcpy(pWorkerA + chunk, pBreakerTempA, kMatrixBlockBytes);",
+        "    std::memcpy(pWorkerB + chunk, pBreakerTempB, kMatrixBlockBytes);",
+        "    const std::uint32_t aPulseFold =",
+        "        FoldBytesXor(pBreakerTempA, kMatrixBlockBytes) ^",
+        "        RotateLeft32(FoldBytesAdd(pBreakerTempB, kMatrixBlockBytes), 3U) ^",
+        "        static_cast<std::uint32_t>(aPulseByteA ^ aPulseByteB);",
+        f"    aPulseA = {twiddle_a_name}(",
+        "        aPulseA ^ aPulseFold,",
+        "        static_cast<std::uint32_t>(pBreakerTempA[0] ^ pBreakerTempB[5]),",
+        "        static_cast<std::uint32_t>(chunk + static_cast<std::size_t>(aPulseByteB)));",
+        f"    aPulseB = {twiddle_b_name}(",
+        "        aPulseB ^ RotateLeft32(aPulseFold, 7U),",
+        "        static_cast<std::uint32_t>(pBreakerTempB[3] + pBreakerTempA[9]),",
+        "        static_cast<std::uint32_t>((chunk >> 4U) + static_cast<std::size_t>(aPulseByteA)));",
+        "  }",
+        "}",
+    ]
 
 
 def render_twiddle_init_lines(
@@ -2763,8 +3007,8 @@ def render_round_key_update_lines(spec: dict[str, Any]) -> list[str]:
         "    const std::uint32_t a = static_cast<std::uint32_t>(pDest[aIndex0]);",
         "    const std::uint32_t b = static_cast<std::uint32_t>(pDest[aIndex1]);",
         "    const std::uint32_t c = static_cast<std::uint32_t>(pDest[aIndex2]);",
-        "    const std::uint32_t salt_byte = static_cast<std::uint32_t>(pSalt[aSourceIndex & 31U]);",
-        "    const std::uint32_t key_byte = static_cast<std::uint32_t>(KeyStackByte(",
+        "    const std::uint32_t aSaltByte = static_cast<std::uint32_t>(pSalt[aSourceIndex & 31U]);",
+        "    const std::uint32_t aKeyByte = static_cast<std::uint32_t>(KeyStackByte(",
         "        pKeyStack,",
         f"        static_cast<std::size_t>((aSourceIndex + {spec['round_key_row']}u) & 15U),",
         f"        static_cast<std::size_t>(aSourceIndex + {spec['round_key_bias']}u)));",
@@ -2772,17 +3016,17 @@ def render_round_key_update_lines(spec: dict[str, Any]) -> list[str]:
     if spec["round_mix_mode"] == "xor_add":
         lines.extend(
             [
-                "    const std::uint32_t aMixValue = static_cast<std::uint32_t>((a + b + salt_byte) & 0xFFu);",
+                "    const std::uint32_t aMixValue = static_cast<std::uint32_t>((a + b + aSaltByte) & 0xFFu);",
                 "    pNextRoundKeyBuffer[aKeyIndex] ^= static_cast<unsigned char>(aMixValue);",
-                "    pNextRoundKeyBuffer[aKeyIndex2] ^= static_cast<unsigned char>((c ^ key_byte) & 0xFFu);",
+                "    pNextRoundKeyBuffer[aKeyIndex2] ^= static_cast<unsigned char>((c ^ aKeyByte) & 0xFFu);",
             ]
         )
     else:
         lines.extend(
             [
-                "    const std::uint32_t aMixValue = static_cast<std::uint32_t>((a ^ b ^ salt_byte) & 0xFFu);",
+                "    const std::uint32_t aMixValue = static_cast<std::uint32_t>((a ^ b ^ aSaltByte) & 0xFFu);",
                 "    pNextRoundKeyBuffer[aKeyIndex] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex] + static_cast<unsigned char>(aMixValue));",
-                "    pNextRoundKeyBuffer[aKeyIndex2] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex2] + static_cast<unsigned char>((c ^ key_byte) & 0xFFu));",
+                "    pNextRoundKeyBuffer[aKeyIndex2] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex2] + static_cast<unsigned char>((c ^ aKeyByte) & 0xFFu));",
             ]
         )
     lines.extend(
@@ -2959,6 +3203,7 @@ def choose_mask_schedule_spec(rng: random.Random) -> dict[str, Any]:
     return {
         "seed_offsets": tuple(choose_signed_offset(rng) for _ in range(3)),
         "seed_reverse_modes": choose_reverse_triplet(rng),
+        "seed_loop_reverse": bool(rng.getrandbits(1)),
         "seed_bias": rng.randint(1, 255),
         "seed_shift": rng.randint(1, 7),
         "seed_stride_a": rng.randint(1, 31),
@@ -2972,6 +3217,7 @@ def choose_mask_schedule_spec(rng: random.Random) -> dict[str, Any]:
         "worker_rotate": rng.randint(1, 7),
         "second_pass": rng.random() < 0.8,
         "second_reverse_modes": choose_reverse_triplet(rng),
+        "second_loop_reverse": bool(rng.getrandbits(1)),
         "second_stride_a": rng.randint(17, 63),
         "second_stride_b": rng.randint(17, 63),
         "second_rotate": rng.randint(1, 7),
@@ -3063,10 +3309,17 @@ def render_mask_stack_seed_lines(
     second_lane2 = loop_lane_expr(spec["second_reverse_modes"][2])
     worker_lane = loop_lane_expr(spec["worker_reverse"])
     xor_mode = "true" if spec["seed_mix_mode"] == "xor_add" else "false"
+    seed_loop_start = "static_cast<int>(PASSWORD_EXPANDED_SIZE) - 1" if spec["seed_loop_reverse"] else "0"
+    seed_loop_end = "-1" if spec["seed_loop_reverse"] else "static_cast<int>(PASSWORD_EXPANDED_SIZE)"
+    seed_loop_step = "-1" if spec["seed_loop_reverse"] else "1"
+    second_loop_start = "static_cast<int>(PASSWORD_EXPANDED_SIZE) - 1" if spec["second_loop_reverse"] else "0"
+    second_loop_end = "-1" if spec["second_loop_reverse"] else "static_cast<int>(PASSWORD_EXPANDED_SIZE)"
+    second_loop_step = "-1" if spec["second_loop_reverse"] else "1"
     lines = [
         f"  std::memset({mask_stack_name}, 0, kMaskStackDepth * kMaskBytes);",
         f"  std::uint32_t aMaskSeedState = static_cast<std::uint32_t>(0x6D2B79F5u ^ {spec['seed_bias']}u ^ {spec['round_bias']}u);",
-        "  for (unsigned int aSourceIndex = 0U; aSourceIndex < PASSWORD_EXPANDED_SIZE; ++aSourceIndex) {",
+        f"  for (int aLoopIndex = {seed_loop_start}; aLoopIndex != {seed_loop_end}; aLoopIndex += {seed_loop_step}) {{",
+        "    const unsigned int aSourceIndex = static_cast<unsigned int>(aLoopIndex);",
         "    const unsigned int aReverseIndex = static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE - 1U - aSourceIndex);",
         f"    const int aIndex0 = WrapRange(static_cast<int>({seed_lane0} * {spec['seed_stride_a']}u + ({offset0})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
         f"    const int aIndex1 = WrapRange(static_cast<int>({seed_lane1} * {spec['seed_stride_b']}u + ({offset1})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
@@ -3107,7 +3360,8 @@ def render_mask_stack_seed_lines(
         rotate = spec["second_rotate"]
         lines.extend(
             [
-                "  for (unsigned int aSourceIndex = 0U; aSourceIndex < PASSWORD_EXPANDED_SIZE; ++aSourceIndex) {",
+                f"  for (int aLoopIndex = {second_loop_start}; aLoopIndex != {second_loop_end}; aLoopIndex += {second_loop_step}) {{",
+                "    const unsigned int aSourceIndex = static_cast<unsigned int>(aLoopIndex);",
                 "    const unsigned int aReverseIndex = static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE - 1U - aSourceIndex);",
                 f"    const int aIndex3 = WrapRange(static_cast<int>({second_lane0} * {spec['second_stride_a']}u + ({offset0})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
                 f"    const int aIndex4 = WrapRange(static_cast<int>({second_lane1} * {spec['second_stride_b']}u + ({offset1})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
@@ -3173,10 +3427,12 @@ def choose_lane_breaker_spec(rng: random.Random) -> dict[str, Any]:
         "enabled": rng.random() < 0.7,
         "source_offset": choose_signed_offset(rng),
         "mask_flat_offset": rng.randint(0, MASK_STACK_TOTAL_BYTES - 1),
+        "flavor": rng.randrange(4),
         "mode_count": 4,
         "partner_bias": rng.randint(1, 7),
         "partner_stride": rng.randint(1, 7),
         "lane_rotate": rng.randint(1, 7),
+        "reverse_store": bool(rng.getrandbits(1)),
     }
 
 
@@ -3185,6 +3441,7 @@ def choose_braid_breaker_spec(rng: random.Random) -> dict[str, Any]:
         "enabled": rng.random() < 0.6,
         "source_offset": choose_signed_offset(rng),
         "mask_flat_offset": rng.randint(0, MASK_STACK_TOTAL_BYTES - 1),
+        "flavor": rng.randrange(4),
         "partner_offset": choose_signed_offset(rng),
         "chunk_span": rng.choice((16, 32, 64)),
         "mode_count": 3,
@@ -3197,6 +3454,7 @@ def choose_jump_breaker_spec(rng: random.Random) -> dict[str, Any]:
         "source_offset": choose_signed_offset(rng),
         "key_offset": rng.randint(0, ROUND_KEY_BYTES - 1),
         "mask_flat_offset": rng.randint(0, MASK_STACK_TOTAL_BYTES - 1),
+        "flavor": rng.randrange(4),
         "partner_offset": choose_signed_offset(rng),
         "jump_stride": rng.choice((4, 8, 16, 32)),
         "section_bytes": rng.choice((2, 4, 8, 16)),
@@ -3209,6 +3467,7 @@ def choose_swap_breaker_spec(rng: random.Random) -> dict[str, Any]:
         "enabled": rng.random() < 0.55,
         "source_offset": choose_signed_offset(rng),
         "partner_offset": choose_signed_offset(rng),
+        "flavor": rng.randrange(4),
         "chunk_span": rng.choice((8, 16, 32, 64)),
         "salt_offset": rng.randint(0, SALT_BYTES - 1),
         "lane_stride": rng.randint(1, 7),
@@ -3327,11 +3586,12 @@ def render_lane_breaker_lines(spec: dict[str, Any]) -> list[str]:
         f"    const auto aWeaveMask = LoadMaskStackBlockWrapped<kMaskBytes>(pMaskStack, chunk + {spec['mask_flat_offset']}u);",
         "    auto lane_a = LoadBlockWrapped<kMaskBytes>(pWorkerA, PASSWORD_EXPANDED_SIZE, chunk);",
         "    auto lane_b = LoadBlockWrapped<kMaskBytes>(pWorkerB, PASSWORD_EXPANDED_SIZE, chunk);",
-        f"    switch (static_cast<unsigned>(aWeaveSource[0] ^ aWeaveSource[3] ^ aWeaveMask[1]) % {spec['mode_count']}u) {{",
+        f"    switch (static_cast<unsigned>(aWeaveSource[{spec['flavor'] & 7}U] ^ aWeaveSource[{(3 + spec['flavor']) & 7}U] ^ aWeaveMask[{(1 + spec['flavor']) & 7}U] ^ static_cast<unsigned char>({spec['flavor'] * 19}u)) % {spec['mode_count']}u) {{",
         "      case 0u:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
-        f"          const std::size_t aPartner = (aLane + {spec['partner_bias']}u + (aWeaveSource[aLane] & {spec['partner_stride']}u)) & 7U;",
-        "          if (((aWeaveSource[aLane] ^ aWeaveMask[aLane]) & 1U) != 0U) {",
+        f"          const std::size_t aFlavorLane = (aLane + {spec['flavor']}u) & 7U;",
+        f"          const std::size_t aPartner = (aLane + {spec['partner_bias']}u + ((aWeaveSource[aFlavorLane] ^ aWeaveMask[(aLane + {spec['flavor']}u + 1U) & 7U]) & {spec['partner_stride']}u)) & 7U;",
+        "          if (((aWeaveSource[aFlavorLane] ^ aWeaveMask[aLane]) & 1U) != 0U) {",
         "            const auto aTemp = lane_a[aLane];",
         "            lane_a[aLane] = lane_b[aPartner];",
         "            lane_b[aPartner] = aTemp;",
@@ -3340,20 +3600,20 @@ def render_lane_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "        break;",
         "      case 1u:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
-        "          const unsigned aBit = static_cast<unsigned>((aWeaveSource[aLane] >> (aLane & 7U)) & 1U);",
+        f"          const unsigned aBit = static_cast<unsigned>((aWeaveSource[(aLane + {spec['flavor']}u) & 7U] >> ((aLane + {spec['flavor']}u) & 7U)) & 1U);",
         "          if (aBit != 0U) {",
-        "            const std::uint8_t aMask = aWeaveMask[aLane];",
+        f"            const std::uint8_t aMask = aWeaveMask[(aLane + {spec['flavor']}u) & 7U];",
         "            const std::uint8_t a = lane_a[aLane];",
-        "            const std::uint8_t b = lane_b[aLane];",
+        f"            const std::uint8_t b = lane_b[(aLane + {spec['flavor']}u) & 7U];",
         "            lane_a[aLane] = static_cast<std::uint8_t>((a & ~aMask) | (b & aMask));",
-        "            lane_b[aLane] = static_cast<std::uint8_t>((b & ~aMask) | (a & aMask));",
+        f"            lane_b[(aLane + {spec['flavor']}u) & 7U] = static_cast<std::uint8_t>((b & ~aMask) | (a & aMask));",
         "          }",
         "        }",
         "        break;",
         "      case 2u:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
-        f"          const std::size_t aPartner = (aLane + {spec['lane_rotate']}u + (aWeaveMask[aLane] & 3U)) & 7U;",
-        "          if (((aWeaveMask[aLane] >> (aLane & 7U)) & 1U) != 0U) {",
+        f"          const std::size_t aPartner = (aLane + {spec['lane_rotate']}u + (aWeaveMask[(aLane + {spec['flavor']}u) & 7U] & 3U) + {spec['flavor']}u) & 7U;",
+        f"          if (((aWeaveMask[(aLane + {spec['flavor']}u) & 7U] >> ((aLane + {spec['flavor']}u) & 7U)) & 1U) != 0U) {{",
         "            const std::uint8_t a = lane_a[aLane];",
         "            const std::uint8_t b = lane_b[aPartner];",
         "            lane_a[aLane] = static_cast<std::uint8_t>((a & 0xF0u) | (b & 0x0Fu));",
@@ -3363,8 +3623,8 @@ def render_lane_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "        break;",
         "      default:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
-        "          const std::size_t aPartner = (aLane + 1U + ((aWeaveSource[aLane] ^ aWeaveMask[aLane]) & 3U)) & 7U;",
-        "          if (((aWeaveSource[aPartner] + aWeaveMask[aLane]) & 1U) != 0U) {",
+        f"          const std::size_t aPartner = (aLane + 1U + ((aWeaveSource[(aLane + {spec['flavor']}u) & 7U] ^ aWeaveMask[(aLane + {spec['flavor']}u) & 7U]) & 3U) + {spec['flavor']}u) & 7U;",
+        f"          if (((aWeaveSource[(aPartner + {spec['flavor']}u) & 7U] + aWeaveMask[aLane]) & 1U) != 0U) {{",
         "            const auto aTemp = lane_a[aPartner];",
         "            lane_a[aPartner] = lane_b[aLane];",
         "            lane_b[aLane] = aTemp;",
@@ -3373,8 +3633,9 @@ def render_lane_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "        break;",
         "    }",
         "    for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
-        "      pWorkerA[(chunk + aLane) % PASSWORD_EXPANDED_SIZE] = lane_a[aLane];",
-        "      pWorkerB[(chunk + aLane) % PASSWORD_EXPANDED_SIZE] = lane_b[aLane];",
+        f"      const std::size_t aStoreLane = {('7U - aLane' if spec['reverse_store'] else 'aLane')};",
+        "      pWorkerA[(chunk + aStoreLane) % PASSWORD_EXPANDED_SIZE] = lane_a[aLane];",
+        "      pWorkerB[(chunk + aStoreLane) % PASSWORD_EXPANDED_SIZE] = lane_b[aLane];",
         "    }",
         "  }",
     ]
@@ -3387,12 +3648,12 @@ def render_braid_breaker_lines(spec: dict[str, Any]) -> list[str]:
         f"    const std::size_t aPartnerBase = static_cast<std::size_t>(WrapRange(static_cast<int>(chunk) + ({spec['partner_offset']}), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE)));",
         f"    const auto aSourceBlock = LoadBlockWrapped<kMaskBytes>(pSource, PASSWORD_EXPANDED_SIZE, static_cast<std::size_t>(WrapRange(static_cast<int>(chunk) + ({spec['source_offset']}), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE))));",
         f"    const auto aMaskBlock = LoadMaskStackBlockWrapped<kMaskBytes>(pMaskStack, chunk + {spec['mask_flat_offset']}u);",
-        f"    switch (static_cast<unsigned>(aSourceBlock[0] ^ aMaskBlock[0]) % {spec['mode_count']}u) {{",
+        f"    switch (static_cast<unsigned>(aSourceBlock[{spec['flavor'] & 7}U] ^ aMaskBlock[{(spec['flavor'] + 1) & 7}U] ^ static_cast<unsigned char>({spec['flavor'] * 23}u)) % {spec['mode_count']}u) {{",
         "      case 0u:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          if (((aSourceBlock[aLane] ^ aMaskBlock[aLane]) & 1U) != 0U) {",
+        f"          const std::size_t aRight = (aPartnerBase + {('7U - aLane' if (spec['flavor'] & 1) else 'aLane')}) % PASSWORD_EXPANDED_SIZE;",
+        f"          if (((aSourceBlock[(aLane + {spec['flavor']}u) & 7U] ^ aMaskBlock[aLane]) & 1U) != 0U) {{",
         "            const unsigned char aTemp = pWorkerA[aLeft];",
         "            pWorkerA[aLeft] = pWorkerB[aRight];",
         "            pWorkerB[aRight] = aTemp;",
@@ -3402,8 +3663,8 @@ def render_braid_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      case 1u:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + ((aLane + 3U) & 7U)) % PASSWORD_EXPANDED_SIZE;",
-        "          const unsigned char aMask = aMaskBlock[aLane];",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane + 3U + {spec['flavor']}u) & 7U)) % PASSWORD_EXPANDED_SIZE;",
+        f"          const unsigned char aMask = aMaskBlock[(aLane + {spec['flavor']}u) & 7U];",
         "          const unsigned char a = pWorkerA[aLeft];",
         "          const unsigned char b = pWorkerB[aRight];",
         "          pWorkerA[aLeft] = static_cast<unsigned char>((a & ~aMask) | (b & aMask));",
@@ -3413,8 +3674,8 @@ def render_braid_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      default:",
         "        for (std::size_t aLane = 0; aLane < kMaskBytes; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          if ((aSourceBlock[aLane] & 1U) != 0U) {",
+        f"          const std::size_t aRight = (aPartnerBase + {('7U - aLane' if (spec['flavor'] & 2) else 'aLane')}) % PASSWORD_EXPANDED_SIZE;",
+        f"          if ((aSourceBlock[(aLane + {spec['flavor']}u) & 7U] & 1U) != 0U) {{",
         "            const unsigned char a = pWorkerA[aLeft];",
         "            const unsigned char b = pWorkerB[aRight];",
         "            pWorkerA[aLeft] = static_cast<unsigned char>((a & 0xF0u) | (b & 0x0Fu));",
@@ -3437,14 +3698,14 @@ def render_jump_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "    const unsigned char aKeyByte = KeyStackByte(pKeyStack, static_cast<std::size_t>((pRound + 3U + chunk) & 15U), chunk + " + str(spec["key_offset"]) + "U);",
         f"    const auto aMaskBlock = LoadMaskStackBlockWrapped<kMaskBytes>(pMaskStack, chunk + {spec['mask_flat_offset']}u);",
         "    const unsigned char aMaskByte0 = aMaskBlock[0];",
-        f"    const std::size_t aSpan = 1U + (static_cast<std::size_t>(aSourceByte ^ aKeyByte ^ aMaskByte0) % {spec['section_bytes']}U);",
-        f"    switch (static_cast<unsigned>(aSourceByte ^ aKeyByte) % {spec['mode_count']}u) {{",
+        f"    const std::size_t aSpan = 1U + (static_cast<std::size_t>(aSourceByte ^ aKeyByte ^ aMaskByte0 ^ static_cast<unsigned char>({spec['flavor'] * 29}u)) % {spec['section_bytes']}U);",
+        f"    switch (static_cast<unsigned>(aSourceByte ^ aKeyByte ^ static_cast<unsigned char>({spec['flavor'] * 31}u)) % {spec['mode_count']}u) {{",
         "      case 0u:",
         "        break;",
         "      case 1u:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + aLane) % PASSWORD_EXPANDED_SIZE;",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
         "          const unsigned char aTemp = pWorkerA[aLeft];",
         "          pWorkerA[aLeft] = pWorkerB[aRight];",
         "          pWorkerB[aRight] = aTemp;",
@@ -3453,8 +3714,8 @@ def render_jump_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      case 2u:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + ((aLane + (aMaskByte0 & 3U)) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
-        "          const unsigned char aMask = aMaskBlock[aLane & 7U];",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane + (aMaskByte0 & 3U) + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
+        f"          const unsigned char aMask = aMaskBlock[(aLane + {spec['flavor']}u) & 7U];",
         "          const unsigned char a = pWorkerA[aLeft];",
         "          const unsigned char b = pWorkerB[aRight];",
         "          pWorkerA[aLeft] = static_cast<unsigned char>((a & ~aMask) | (b & aMask));",
@@ -3464,8 +3725,8 @@ def render_jump_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      case 3u:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + ((aLane * 3U + (aSourceByte & 3U)) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
-        "          if (((aMaskBlock[aLane & 7U] >> (aLane & 7U)) & 1U) != 0U) {",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane * 3U + (aSourceByte & 3U) + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
+        f"          if (((aMaskBlock[(aLane + {spec['flavor']}u) & 7U] >> ((aLane + {spec['flavor']}u) & 7U)) & 1U) != 0U) {{",
         "            const unsigned char aTemp = pWorkerA[aLeft];",
         "            pWorkerA[aLeft] = pWorkerA[aRight];",
         "            pWorkerA[aRight] = aTemp;",
@@ -3479,8 +3740,8 @@ def render_jump_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      default:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + ((aLane + 1U + (aKeyByte & 3U)) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
-        "          const unsigned char aMask = aMaskBlock[(aLane + aSourceByte) & 7U];",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane + 1U + (aKeyByte & 3U) + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
+        f"          const unsigned char aMask = aMaskBlock[(aLane + aSourceByte + static_cast<unsigned char>({spec['flavor']}u)) & 7U];",
         "          const unsigned char a = pWorkerA[aLeft];",
         "          const unsigned char b = pWorkerB[aRight];",
         "          if (((aSourceByte ^ aKeyByte ^ aMask) & 1U) != 0U) {",
@@ -3503,13 +3764,13 @@ def render_swap_breaker_lines(spec: dict[str, Any]) -> list[str]:
         f"  for (std::size_t chunk = 0; chunk < PASSWORD_EXPANDED_SIZE; chunk += {spec['chunk_span']}U) {{",
         f"    const std::size_t aPartnerBase = static_cast<std::size_t>(WrapRange(static_cast<int>(chunk) + ({spec['partner_offset']}), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE)));",
         f"    const std::size_t aControlIndex = static_cast<std::size_t>(WrapRange(static_cast<int>(chunk) + ({spec['source_offset']}), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE)));",
-        f"    const unsigned char aRuleByte = static_cast<unsigned char>(pSource[aControlIndex] ^ pSalt[(chunk / {spec['chunk_span']}U + {spec['salt_offset']}u) & 31U] ^ static_cast<unsigned char>(pRound));",
-        f"    const std::size_t aSpan = 1U + (static_cast<std::size_t>(aRuleByte ^ pSalt[{spec['salt_offset']}u]) % {spec['chunk_span']}U);",
+        f"    const unsigned char aRuleByte = static_cast<unsigned char>(pSource[aControlIndex] ^ pSalt[(chunk / {spec['chunk_span']}U + {spec['salt_offset']}u + {spec['flavor']}u) & 31U] ^ static_cast<unsigned char>(pRound + {spec['flavor'] * 13}u));",
+        f"    const std::size_t aSpan = 1U + (static_cast<std::size_t>(aRuleByte ^ pSalt[({spec['salt_offset']}u + {spec['flavor']}u) & 31U]) % {spec['chunk_span']}U);",
         f"    switch (static_cast<unsigned>(aRuleByte) % {spec['mode_count']}u) {{",
         "      case 0u:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
-        f"          const std::size_t aLeft = (chunk + aLane * {spec['lane_stride']}u) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + aLane) % PASSWORD_EXPANDED_SIZE;",
+        f"          const std::size_t aLeft = (chunk + (aLane + {spec['flavor']}u) * {spec['lane_stride']}u) % PASSWORD_EXPANDED_SIZE;",
+        f"          const std::size_t aRight = (aPartnerBase + {('aSpan - 1U - aLane' if (spec['flavor'] & 1) else 'aLane')}) % PASSWORD_EXPANDED_SIZE;",
         "          const unsigned char aSourceByte = pSource[(aLeft + static_cast<std::size_t>(aRuleByte)) % PASSWORD_EXPANDED_SIZE];",
         "          const unsigned char aSaltByte = pSalt[(aLane + static_cast<std::size_t>(aRuleByte)) & 31U];",
         "          if (((aSourceByte ^ aSaltByte) & 1U) != 0U) {",
@@ -3522,7 +3783,7 @@ def render_swap_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      case 1u:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        f"          const std::size_t aRight = (aPartnerBase + ((aLane * {spec['partner_stride']}u + static_cast<std::size_t>(aRuleByte)) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane * {spec['partner_stride']}u + static_cast<std::size_t>(aRuleByte) + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
         "          const unsigned char aSourceByte = pSource[(aRight + static_cast<std::size_t>(aRuleByte)) % PASSWORD_EXPANDED_SIZE];",
         f"          const unsigned char aSaltByte = pSalt[(aLane + {spec['salt_offset']}u) & 31U];",
         "          if (((aSourceByte + aSaltByte) & 3U) != 0U) {",
@@ -3535,7 +3796,7 @@ def render_swap_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      case 2u:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + (aSpan - 1U - aLane)) % PASSWORD_EXPANDED_SIZE;",
+        f"          const std::size_t aRight = (aPartnerBase + ((aSpan - 1U - aLane + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
         "          const unsigned char aSourceByte = pSource[(aLeft + aRight) % PASSWORD_EXPANDED_SIZE];",
         "          const unsigned char aSaltByte = pSalt[(aLane + 11U + static_cast<std::size_t>(aRuleByte)) & 31U];",
         "          if (((aSourceByte ^ aSaltByte ^ aRuleByte) & 1U) != 0U) {",
@@ -3548,7 +3809,7 @@ def render_swap_breaker_lines(spec: dict[str, Any]) -> list[str]:
         "      default:",
         "        for (std::size_t aLane = 0; aLane < aSpan; ++aLane) {",
         "          const std::size_t aLeft = (chunk + aLane) % PASSWORD_EXPANDED_SIZE;",
-        "          const std::size_t aRight = (aPartnerBase + ((aLane + static_cast<std::size_t>(aRuleByte)) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
+        f"          const std::size_t aRight = (aPartnerBase + ((aLane + static_cast<std::size_t>(aRuleByte) + {spec['flavor']}u) % aSpan)) % PASSWORD_EXPANDED_SIZE;",
         "          const unsigned char aSourceByte = pSource[(aControlIndex + aLane) % PASSWORD_EXPANDED_SIZE];",
         "          const unsigned char aSaltByte = pSalt[(aLane + 17U + static_cast<std::size_t>(aRuleByte)) & 31U];",
         "          if (((aSourceByte + aSaltByte + aRuleByte) & 1U) == 0U) {",
@@ -3587,12 +3848,228 @@ def build_breaker_source_offsets(desired_count: int, *candidate_groups: Any) -> 
     return tuple(unique_offsets[:desired_count])
 
 
-def render_dual_worker_matrix_breaker_lines(recipe_name: str, recipe: dict[str, Any]) -> list[str]:
-    recipe_type = f"DualWorkerBreakerRecipe{recipe['index_count']}"
+def render_custom_dual_worker_matrix_breaker_lines(
+    function_name: str,
+    candidate_id: int,
+) -> list[str]:
+    breaker_const_a = ((candidate_id * 0x9E3779B9) ^ 0xA341316C) & 0xFFFFFFFF
+    breaker_const_b = ((candidate_id * 0x85EBCA6B) ^ 0xC8013EA4) & 0xFFFFFFFF
+    twiddle_a_name = f"{function_name}_AdvanceTwiddle32A"
+    twiddle_b_name = f"{function_name}_AdvanceTwiddle32B"
+    helper_name = f"{function_name}_ApplyDualWorkerMatrixBreaker"
+    return [
+        f"static void {helper_name}(",
+        "    const DualWorkerBreakerRecipe4& pRecipe,",
+        "    const unsigned char* pSource,",
+        "    unsigned char* pWorkerA,",
+        "    unsigned char* pWorkerB,",
+        "    const unsigned char (&pSalt)[kSaltBytes],",
+        "    unsigned char (&pKeyStack)[kRoundKeyStackDepth][kRoundKeyBytes],",
+        "    unsigned char (&pMaskStackA)[kMaskStackDepth][kMaskBytes],",
+        "    unsigned char (&pMaskStackB)[kMaskStackDepth][kMaskBytes],",
+        "    unsigned int pRound,",
+        "    unsigned char (&pBreakerTempA)[kMatrixBlockBytes],",
+        "    unsigned char (&pBreakerTempB)[kMatrixBlockBytes]) {",
+        "  if (pSource == nullptr || pWorkerA == nullptr || pWorkerB == nullptr) {",
+        "    return;",
+        "  }",
+        f"  std::uint32_t aSequenceA = {twiddle_a_name}(",
+        f"      0x{breaker_const_a:08X}u ^ static_cast<std::uint32_t>(pRound),",
+        "      static_cast<std::uint32_t>(pRecipe.fast_rule) ^ static_cast<std::uint32_t>(pRecipe.key_row),",
+        "      static_cast<std::uint32_t>(pRecipe.slow_rule) ^ static_cast<std::uint32_t>(pRecipe.key_offset));",
+        f"  std::uint32_t aSequenceB = {twiddle_b_name}(",
+        f"      0x{breaker_const_b:08X}u ^ static_cast<std::uint32_t>(pRound),",
+        "      static_cast<std::uint32_t>(pRecipe.mixlane_a) ^ static_cast<std::uint32_t>(pRecipe.matrix_mode),",
+        "      static_cast<std::uint32_t>(pRecipe.mixlane_b) ^ static_cast<std::uint32_t>(pRecipe.inject_mode));",
+        "  for (std::size_t chunk = 0; chunk < PASSWORD_EXPANDED_SIZE; chunk += kMatrixBlockBytes) {",
+        "    DualWorkerBreakerRecipe4 aRecipe = pRecipe;",
+        "    const unsigned char aSequenceByteA = FoldWordToByte(aSequenceA);",
+        "    const unsigned char aSequenceByteB = FoldWordToByte(aSequenceB);",
+        "    aRecipe.mixlane_a = static_cast<std::uint8_t>((aRecipe.mixlane_a + (aSequenceByteA & 3U) + ((chunk / kMatrixBlockBytes) & 1U)) & 15U);",
+        "    aRecipe.mixlane_b = static_cast<std::uint8_t>((aRecipe.mixlane_b + (aSequenceByteB & 3U) + ((aSequenceByteA >> 5U) & 1U)) & 15U);",
+        "    aRecipe.emit_mode = static_cast<std::uint8_t>((aRecipe.emit_mode ^ ((aSequenceByteA >> 7U) & 1U)) & 1U);",
+        "    aRecipe.inject_mode = static_cast<std::uint8_t>((aRecipe.inject_mode + (aSequenceByteB & 3U)) & 3U);",
+        "    aRecipe.matrix_mode = static_cast<std::uint8_t>((aRecipe.matrix_mode + ((aSequenceByteA >> 2U) & 3U)) & 3U);",
+        "    aRecipe.source_mix_variant = static_cast<std::uint8_t>((aRecipe.source_mix_variant + ((aSequenceByteB >> 4U) & 3U)) & 3U);",
+        "    aRecipe.lane_mix_variant_a = static_cast<std::uint8_t>((aRecipe.lane_mix_variant_a + ((aSequenceByteA >> 3U) & 3U)) & 3U);",
+        "    aRecipe.lane_mix_variant_b = static_cast<std::uint8_t>((aRecipe.lane_mix_variant_b + ((aSequenceByteB >> 1U) & 3U)) & 3U);",
+        "    std::array<std::array<unsigned char, kMatrixBlockBytes>, 4> aSourceBlocks{};",
+        "    for (std::size_t aSourceIndexId = 0; aSourceIndexId < aSourceBlocks.size(); ++aSourceIndexId) {",
+        "      const int aSourceOffset =",
+        "          aRecipe.source_offsets[aSourceIndexId] +",
+        "          static_cast<int>((aSequenceA >> ((aSourceIndexId * 7U) & 31U)) & 0x0FU) -",
+        "          static_cast<int>((aSequenceB >> ((aSourceIndexId * 5U) & 31U)) & 0x07U);",
+        "      const std::size_t aSourceIndex = static_cast<std::size_t>(WrapRange(",
+        "          static_cast<int>(chunk) +",
+        "              aSourceOffset +",
+        "              static_cast<int>(aSourceIndexId * static_cast<std::size_t>(((aRecipe.index_mode & 3U) + 1U) * 11U)),",
+        "          0,",
+        "          static_cast<int>(PASSWORD_EXPANDED_SIZE)));",
+        "      aSourceBlocks[aSourceIndexId] = LoadBlockWrapped<kMatrixBlockBytes>(pSource, PASSWORD_EXPANDED_SIZE, aSourceIndex);",
+        "    }",
+        "    const std::size_t aControlIndex = static_cast<std::size_t>(WrapRange(",
+        "        static_cast<int>(chunk) + aRecipe.control_offset + static_cast<int>(aSequenceByteA) - 16,",
+        "        0,",
+        "        static_cast<int>(PASSWORD_EXPANDED_SIZE)));",
+        "    const std::size_t aPartnerIndex = static_cast<std::size_t>(WrapRange(",
+        "        static_cast<int>(chunk) + aRecipe.partner_offset + static_cast<int>(aSequenceByteB) - 16,",
+        "        0,",
+        "        static_cast<int>(PASSWORD_EXPANDED_SIZE)));",
+        "    const auto aControl = LoadBlockWrapped<kMatrixBlockBytes>(pSource, PASSWORD_EXPANDED_SIZE, aControlIndex);",
+        "    const auto aPartner = (((aSequenceByteB ^ aRecipe.index_mode) & 1U) == 0U)",
+        "        ? LoadBlockWrapped<kMatrixBlockBytes>(pWorkerB, PASSWORD_EXPANDED_SIZE, aPartnerIndex)",
+        "        : LoadBlockWrapped<kMatrixBlockBytes>(pWorkerA, PASSWORD_EXPANDED_SIZE, aPartnerIndex);",
+        "    const auto aBlockA = LoadBlockWrapped<kMatrixBlockBytes>(pWorkerA, PASSWORD_EXPANDED_SIZE, chunk);",
+        "    const auto aBlockB = LoadBlockWrapped<kMatrixBlockBytes>(pWorkerB, PASSWORD_EXPANDED_SIZE, chunk);",
+        "    const auto aMaskA = LoadMaskStackBlockWrapped<kMatrixBlockBytes>(",
+        "        pMaskStackA,",
+        "        chunk + aRecipe.mask_flat_offset + static_cast<std::size_t>((aSequenceByteA & 7U) * 5U));",
+        "    const auto aMaskB = LoadMaskStackBlockWrapped<kMatrixBlockBytes>(",
+        "        pMaskStackB,",
+        "        chunk + aRecipe.mask_flat_offset + static_cast<std::size_t>((aSequenceByteB & 7U) * 7U) + 11U);",
+        "    const auto aKey = LoadKeyStackBlock16Wrapped(",
+        "        pKeyStack,",
+        "        static_cast<std::size_t>((pRound + aRecipe.key_row + (aSequenceByteA & 3U)) & 15U),",
+        "        chunk + aRecipe.key_offset + static_cast<std::size_t>(aSequenceByteB & 7U));",
+        "    const auto aLaneSeedA =",
+        "        BuildRecipeMatrixBytes(aRecipe, aSourceBlocks, aBlockA, aBlockB, aControl, aPartner, aKey, aMaskA, aMaskB, 0U);",
+        "    const auto aLaneSeedB =",
+        "        BuildRecipeMatrixBytes(aRecipe, aSourceBlocks, aBlockA, aBlockB, aControl, aPartner, aKey, aMaskA, aMaskB, 1U);",
+        "    const auto aFeedSeedA =",
+        "        BuildRecipeMatrixBytes(aRecipe, aSourceBlocks, aBlockA, aBlockB, aControl, aPartner, aKey, aMaskA, aMaskB, 2U);",
+        "    const auto aFeedSeedB =",
+        "        BuildRecipeMatrixBytes(aRecipe, aSourceBlocks, aBlockA, aBlockB, aControl, aPartner, aKey, aMaskA, aMaskB, 3U);",
+        "    LightningMatrix aLaneA(aLaneSeedA.data());",
+        "    LightningMatrix aLaneB(aLaneSeedB.data());",
+        "    LightningMatrix aFeedMatrixA(aFeedSeedA.data());",
+        "    LightningMatrix aFeedMatrixB(aFeedSeedB.data());",
+        "    InjectRecipeSourceMatrices(aRecipe, aSourceBlocks, aLaneA, aLaneB, pSalt);",
+        "    if (((aSequenceByteA ^ aRecipe.matrix_mode) & 1U) == 0U) {",
+        "      aLaneA.AddWith(aFeedMatrixA);",
+        "      aLaneB.XorWith(aFeedMatrixB);",
+        "    } else {",
+        "      aLaneA.XorWith(aFeedMatrixA);",
+        "      aLaneB.AddWith(aFeedMatrixB);",
+        "    }",
+        "    if (((aSequenceByteB ^ aRecipe.emit_mode) & 1U) != 0U) {",
+        "      aLaneA.XorWith(aFeedMatrixB);",
+        "      aLaneB.AddWith(aFeedMatrixA);",
+        "    }",
+        "    ApplyRecipeLaneInjects(aRecipe, aLaneA, aLaneB, aMaskA, aMaskB, aControl, aPartner, aKey, pSalt);",
+        "    if (((aSequenceByteA + aSequenceByteB + aRecipe.inject_mode) & 1U) == 0U) {",
+        "      aLaneA.InjectXor(aPartner.data(), aPartner.size(), aPartner[0] & 15U);",
+        "      aLaneB.InjectAdd(aKey.data(), aKey.size(), aKey[1] & 15U);",
+        "    } else {",
+        "      aLaneA.InjectAdd(aKey.data(), aKey.size(), aKey[2] & 15U);",
+        "      aLaneB.InjectXor(aPartner.data(), aPartner.size(), aPartner[3] & 15U);",
+        "    }",
+        "    std::uint32_t aSourceFold = FoldBytesXor(aSourceBlocks[0].data(), aSourceBlocks[0].size());",
+        "    aSourceFold ^= FoldBytesAdd(aSourceBlocks[1].data(), aSourceBlocks[1].size());",
+        "    aSourceFold ^= FoldBytesXor(aSourceBlocks[2].data(), aSourceBlocks[2].size()) << 1U;",
+        "    aSourceFold ^= FoldBytesAdd(aSourceBlocks[3].data(), aSourceBlocks[3].size()) << 2U;",
+        "    const std::uint32_t aSelector =",
+        "        FoldBytesXor(aControl.data(), aControl.size()) ^",
+        "        FoldBytesAdd(aMaskA.data(), aMaskA.size()) ^",
+        "        FoldBytesXor(aMaskB.data(), aMaskB.size()) ^",
+        "        FoldBytesXor(aKey.data(), aKey.size()) ^",
+        "        FoldBytesAdd(aPartner.data(), aPartner.size()) ^",
+        "        aSourceFold ^",
+        "        aSequenceA ^",
+        "        RotateLeft32(aSequenceB, 7U) ^",
+        "        static_cast<std::uint32_t>(aRecipe.fast_rule) ^",
+        "        static_cast<std::uint32_t>(pRound * 17U);",
+        "    aLaneA.ApplyFastOp(",
+        "        static_cast<LightningFastOp>((aSelector + aSequenceByteA) % 12U),",
+        "        static_cast<std::uint8_t>(aControl[0] ^ aKey[aRecipe.mixlane_a & 15U] ^ FoldRecipeSourceLane(aSourceBlocks, aSequenceByteA & 15U, aRecipe)),",
+        "        static_cast<std::uint8_t>(aMaskA[1] + aMaskB[2] + aRecipe.mixlane_b + FoldRecipeSourceLane(aSourceBlocks, 1U + (aSequenceByteB & 7U), aRecipe)));",
+        "    aLaneB.ApplyFastOp(",
+        "        static_cast<LightningFastOp>(((aSelector >> 3U) + aSequenceByteB) % 12U),",
+        "        static_cast<std::uint8_t>(aControl[2] + aKey[(aRecipe.mixlane_b + 3U) & 15U] + FoldRecipeSourceLane(aSourceBlocks, 2U + (aSequenceByteA & 7U), aRecipe)),",
+        "        static_cast<std::uint8_t>(aMaskB[3] ^ aMaskA[4] ^ aRecipe.mixlane_a ^ FoldRecipeSourceLane(aSourceBlocks, 3U + (aSequenceByteB & 7U), aRecipe)));",
+        "    const std::uint32_t aSlowSelector =",
+        "        aSelector ^",
+        "        FoldBytesAdd(aPartner.data(), aPartner.size()) ^",
+        "        RotateLeft32(aSourceFold, 5U) ^",
+        "        aSequenceB ^",
+        "        static_cast<std::uint32_t>(aRecipe.slow_rule);",
+        "    aLaneA.ApplySlowOp(",
+        "        static_cast<LightningSlowOp>((aSlowSelector + aSequenceByteB) % 8U),",
+        "        static_cast<std::uint8_t>(aControl[4] + aMaskA[5] + aMaskB[6] + FoldRecipeSourceLane(aSourceBlocks, 4U + (aSequenceByteA & 3U), aRecipe)),",
+        "        static_cast<std::uint8_t>(aKey[6] ^ pSalt[(aRecipe.salt_offset + 5U) & 31U] ^ FoldRecipeSourceLane(aSourceBlocks, 5U + (aSequenceByteB & 3U), aRecipe)));",
+        "    aLaneB.ApplySlowOp(",
+        "        static_cast<LightningSlowOp>(((aSlowSelector >> 5U) + aSequenceByteA) % 8U),",
+        "        static_cast<std::uint8_t>(aControl[7] ^ aMaskB[8] ^ aMaskA[9] ^ FoldRecipeSourceLane(aSourceBlocks, 6U + (aSequenceByteA & 3U), aRecipe)),",
+        "        static_cast<std::uint8_t>(aKey[9] + pSalt[(aRecipe.salt_offset + 11U) & 31U] + FoldRecipeSourceLane(aSourceBlocks, 7U + (aSequenceByteB & 3U), aRecipe)));",
+        "    ApplyLightningMixColumns(",
+        "        aLaneA,",
+        "        pSalt,",
+        "        static_cast<std::uint8_t>(aRecipe.salt_offset + FoldRecipeSourceLane(aSourceBlocks, 8U + (aSequenceByteA & 3U), aRecipe)),",
+        "        static_cast<std::uint8_t>(aRecipe.fast_rule ^ FoldWordToByte(aSelector ^ aSequenceA)),",
+        "        aRecipe.lane_mix_variant_a);",
+        "    ApplyLightningMixColumns(",
+        "        aLaneB,",
+        "        pSalt,",
+        "        static_cast<std::uint8_t>(aRecipe.salt_offset + 11U + FoldRecipeSourceLane(aSourceBlocks, 9U + (aSequenceByteB & 3U), aRecipe)),",
+        "        static_cast<std::uint8_t>(aRecipe.slow_rule ^ FoldWordToByte(aSlowSelector ^ aSequenceB)),",
+        "        aRecipe.lane_mix_variant_b);",
+        "    aLaneA.Store(pBreakerTempA);",
+        "    aLaneB.Store(pBreakerTempB);",
+        "    for (std::size_t aLane = 0; aLane < kMatrixBlockBytes; ++aLane) {",
+        "      const unsigned char aSourceFeedback = FoldRecipeSourceLane(aSourceBlocks, aLane + (aSequenceByteA & 3U), aRecipe);",
+        "      const unsigned char aFeedback = FixedMixBoxByte(static_cast<unsigned char>(",
+        "          aSourceFeedback ^",
+        "          aControl[(aLane + aRecipe.mixlane_b) & 15U] ^",
+        "          aKey[(aLane + 3U + (aSequenceByteB & 1U)) & 15U] ^",
+        "          aMaskA[(aLane + 5U) & 15U] ^",
+        "          aMaskB[(aLane + 9U) & 15U] ^",
+        "          aPartner[(aLane + aRecipe.mixlane_a + aRecipe.index_mode + (aSequenceByteA & 1U)) & 15U] ^",
+        "          pSalt[(aLane + aRecipe.salt_offset + (aSequenceByteB & 3U)) & 31U] ^",
+        "          aSequenceByteA ^",
+        "          aSequenceByteB));",
+        "      const unsigned char aStoreA = pBreakerTempA[aLane];",
+        "      const unsigned char aStoreB = pBreakerTempB[aLane];",
+        "      if (((aSequenceByteA + static_cast<unsigned char>(aLane) + aRecipe.emit_mode) & 1U) == 0U) {",
+        "        pWorkerA[chunk + aLane] = static_cast<unsigned char>(",
+        "            aStoreA ^",
+        "            RotateLeft8(pBreakerTempB[(aLane + aRecipe.mixlane_a + aRecipe.index_mode) & 15U], 1U) ^",
+        "            aFeedback);",
+        "        pWorkerB[chunk + aLane] = static_cast<unsigned char>(",
+        "            aStoreB +",
+        "            RotateLeft8(pBreakerTempA[(aLane + aRecipe.mixlane_b + (aRecipe.index_mode & 3U)) & 15U], 3U) +",
+        "            aFeedback);",
+        "      } else {",
+        "        pWorkerA[chunk + aLane] = static_cast<unsigned char>(",
+        "            aStoreA +",
+        "            RotateLeft8(pBreakerTempB[(aLane + aRecipe.mixlane_a + aRecipe.index_mode) & 15U], 1U) +",
+        "            aFeedback);",
+        "        pWorkerB[chunk + aLane] = static_cast<unsigned char>(",
+        "            aStoreB ^",
+        "            RotateLeft8(pBreakerTempA[(aLane + aRecipe.mixlane_b + (aRecipe.index_mode & 3U)) & 15U], 3U) ^",
+        "            aFeedback);",
+        "      }",
+        "    }",
+        f"    aSequenceA = {twiddle_a_name}(",
+        "        aSequenceA ^ aSelector,",
+        "        static_cast<std::uint32_t>(pBreakerTempA[0] ^ aKey[1] ^ aPartner[2]),",
+        "        aSourceFold ^ static_cast<std::uint32_t>(chunk));",
+        f"    aSequenceB = {twiddle_b_name}(",
+        "        aSequenceB ^ aSlowSelector,",
+        "        static_cast<std::uint32_t>(pBreakerTempB[3] ^ aMaskA[4] ^ aMaskB[5]),",
+        "        aSourceFold ^ static_cast<std::uint32_t>(chunk >> 4U));",
+        "  }",
+        "}",
+    ]
+
+
+def render_dual_worker_matrix_breaker_lines(
+    function_name: str,
+    recipe_name: str,
+    recipe: dict[str, Any],
+) -> list[str]:
     source_offsets = ", ".join(str(offset) for offset in recipe["source_offsets"])
     return [
         "  {",
-        f"    const {recipe_type} {recipe_name}{{",
+        f"    const DualWorkerBreakerRecipe4 {recipe_name}{{",
         f"        {{{source_offsets}}},",
         f"        {recipe['control_offset']},",
         f"        {recipe['partner_offset']},",
@@ -3612,7 +4089,7 @@ def render_dual_worker_matrix_breaker_lines(recipe_name: str, recipe: dict[str, 
         f"        static_cast<std::uint8_t>({recipe['inject_mode']}u),",
         f"        static_cast<std::uint8_t>({recipe['matrix_mode']}u),",
         "    };",
-        f"    ApplyDualWorkerMatrixBreaker({recipe_name}, pSource, pWorkerA, pWorkerB, pSalt, pKeyStack, pMaskStackA, pMaskStackB, pRound);",
+        f"    {function_name}_ApplyDualWorkerMatrixBreaker({recipe_name}, pSource, pWorkerA, pWorkerB, pSalt, pKeyStack, pMaskStackA, pMaskStackB, pRound, pBreakerTempA, pBreakerTempB);",
         "  }",
     ]
 
@@ -3628,90 +4105,87 @@ def build_dual_worker_breaker_recipes(
 ) -> list[tuple[str, dict[str, Any]]]:
     recipes: list[tuple[str, dict[str, Any]]] = []
 
-    if lane_breaker_spec["enabled"] or braid_breaker_spec["enabled"]:
-        index_count_ab = max(2, min(4, 2 + int(lane_breaker_spec["enabled"]) + int(braid_breaker_spec["enabled"])))
-        recipes.append(
-            (
-                "aBreakerAB",
-                {
-                    "index_count": index_count_ab,
-                    "source_offsets": build_breaker_source_offsets(
-                        index_count_ab,
-                        worker_a_spec["offsets"],
-                        lane_breaker_spec["source_offset"],
-                        braid_breaker_spec["source_offset"],
-                        worker_b_spec["offsets"][0],
-                        final_spec["offsets"][0],
-                    ),
-                    "control_offset": braid_breaker_spec["source_offset"] if braid_breaker_spec["enabled"] else worker_a_spec["control_offset"],
-                    "partner_offset": braid_breaker_spec["partner_offset"] if braid_breaker_spec["enabled"] else lane_breaker_spec["partner_bias"] * 4,
-                    "mask_flat_offset": (
-                        (lane_breaker_spec["mask_flat_offset"] if lane_breaker_spec["enabled"] else 0)
-                        + (braid_breaker_spec["mask_flat_offset"] if braid_breaker_spec["enabled"] else 0)
-                    ) % MASK_STACK_TOTAL_BYTES,
-                    "key_row": worker_a_spec["key_row"] % ROUND_KEY_STACK_DEPTH,
-                    "key_offset": worker_a_spec["key_offset"] % ROUND_KEY_BYTES,
-                    "salt_offset": (worker_a_spec["salt_offset"] + lane_breaker_spec["partner_bias"]) % SALT_BYTES,
-                    "mixlane_a": (lane_breaker_spec["lane_rotate"] + worker_a_spec["control_shift"]) % 16,
-                    "mixlane_b": (
-                        lane_breaker_spec["partner_bias"]
-                        + braid_breaker_spec["mode_count"]
-                        + worker_b_spec["control_shift"]
-                    ) % 16,
-                    "fast_rule": (
-                        lane_breaker_spec["mode_count"] * 17
-                        + worker_a_spec["template"] * 13
-                        + int(braid_breaker_spec["enabled"]) * 29
-                    ) & 0xFF,
-                    "slow_rule": (
-                        braid_breaker_spec["chunk_span"]
-                        + braid_breaker_spec["mode_count"] * 19
-                        + worker_b_spec["template"] * 7
-                    ) & 0xFF,
-                    "index_mode": (
-                        worker_a_spec["data_index_count"]
-                        + lane_breaker_spec["mode_count"]
-                        + braid_breaker_spec["mode_count"]
-                    ) & 0x0F,
-                    "emit_mode": 0 if worker_a_spec["control_mode"] == "key" else 1,
-                    "source_mix_variant": (
-                        worker_a_spec["template"]
-                        + lane_breaker_spec["mode_count"]
-                        + int(braid_breaker_spec["enabled"])
-                    ) & 0x03,
-                    "lane_mix_variant_a": (
-                        worker_a_spec["data_index_count"]
-                        + worker_b_spec["template"]
-                        + final_spec["template"]
-                    ) & 0x03,
-                    "lane_mix_variant_b": (
-                        lane_breaker_spec["partner_bias"]
-                        + braid_breaker_spec["chunk_span"]
-                        + worker_b_spec["data_index_count"]
-                    ) & 0x03,
-                    "inject_mode": (
-                        worker_a_spec["template"]
-                        + worker_b_spec["template"]
-                        + lane_breaker_spec["mode_count"]
-                    ) & 0x03,
-                    "matrix_mode": (
-                        worker_a_spec["data_index_count"]
-                        + braid_breaker_spec["mode_count"]
-                        + final_spec["template"]
-                    ) & 0x03,
-                },
-            )
+    recipes.append(
+        (
+            "aBreakerAB",
+            {
+                "index_count": 4,
+                "source_offsets": build_breaker_source_offsets(
+                    4,
+                    worker_a_spec["offsets"],
+                    lane_breaker_spec["source_offset"],
+                    braid_breaker_spec["source_offset"],
+                    worker_b_spec["offsets"][0],
+                    final_spec["offsets"][0],
+                ),
+                "control_offset": braid_breaker_spec["source_offset"] if braid_breaker_spec["enabled"] else worker_a_spec["control_offset"],
+                "partner_offset": braid_breaker_spec["partner_offset"] if braid_breaker_spec["enabled"] else lane_breaker_spec["partner_bias"] * 4,
+                "mask_flat_offset": (
+                    (lane_breaker_spec["mask_flat_offset"] if lane_breaker_spec["enabled"] else 0)
+                    + (braid_breaker_spec["mask_flat_offset"] if braid_breaker_spec["enabled"] else 0)
+                ) % MASK_STACK_TOTAL_BYTES,
+                "key_row": worker_a_spec["key_row"] % ROUND_KEY_STACK_DEPTH,
+                "key_offset": worker_a_spec["key_offset"] % ROUND_KEY_BYTES,
+                "salt_offset": (worker_a_spec["salt_offset"] + lane_breaker_spec["partner_bias"]) % SALT_BYTES,
+                "mixlane_a": (lane_breaker_spec["lane_rotate"] + worker_a_spec["control_shift"]) % 16,
+                "mixlane_b": (
+                    lane_breaker_spec["partner_bias"]
+                    + braid_breaker_spec["mode_count"]
+                    + worker_b_spec["control_shift"]
+                ) % 16,
+                "fast_rule": (
+                    lane_breaker_spec["mode_count"] * 17
+                    + worker_a_spec["template"] * 13
+                    + int(braid_breaker_spec["enabled"]) * 29
+                ) & 0xFF,
+                "slow_rule": (
+                    braid_breaker_spec["chunk_span"]
+                    + braid_breaker_spec["mode_count"] * 19
+                    + worker_b_spec["template"] * 7
+                ) & 0xFF,
+                "index_mode": (
+                    worker_a_spec["data_index_count"]
+                    + lane_breaker_spec["mode_count"]
+                    + braid_breaker_spec["mode_count"]
+                ) & 0x0F,
+                "emit_mode": 0 if worker_a_spec["control_mode"] == "key" else 1,
+                "source_mix_variant": (
+                    worker_a_spec["template"]
+                    + lane_breaker_spec["mode_count"]
+                    + int(braid_breaker_spec["enabled"])
+                ) & 0x03,
+                "lane_mix_variant_a": (
+                    worker_a_spec["data_index_count"]
+                    + worker_b_spec["template"]
+                    + final_spec["template"]
+                ) & 0x03,
+                "lane_mix_variant_b": (
+                    lane_breaker_spec["partner_bias"]
+                    + braid_breaker_spec["chunk_span"]
+                    + worker_b_spec["data_index_count"]
+                ) & 0x03,
+                "inject_mode": (
+                    worker_a_spec["template"]
+                    + worker_b_spec["template"]
+                    + lane_breaker_spec["mode_count"]
+                ) & 0x03,
+                "matrix_mode": (
+                    worker_a_spec["data_index_count"]
+                    + braid_breaker_spec["mode_count"]
+                    + final_spec["template"]
+                ) & 0x03,
+            },
         )
+    )
 
     if jump_breaker_spec["enabled"] or swap_breaker_spec["enabled"]:
-        index_count_cd = max(2, min(4, 2 + int(jump_breaker_spec["enabled"]) + int(swap_breaker_spec["enabled"])))
         recipes.append(
             (
                 "aBreakerCD",
                 {
-                    "index_count": index_count_cd,
+                    "index_count": 4,
                     "source_offsets": build_breaker_source_offsets(
-                        index_count_cd,
+                        4,
                         worker_b_spec["offsets"],
                         jump_breaker_spec["source_offset"],
                         swap_breaker_spec["source_offset"],
@@ -3780,7 +4254,115 @@ def build_dual_worker_breaker_recipes(
             )
         )
 
-    return recipes
+    enabled_total = sum(
+        int(flag)
+        for flag in (
+            lane_breaker_spec["enabled"],
+            braid_breaker_spec["enabled"],
+            jump_breaker_spec["enabled"],
+            swap_breaker_spec["enabled"],
+        )
+    )
+    if enabled_total >= 3:
+        recipes.append(
+            (
+                "aBreakerEF",
+                {
+                    "index_count": 4,
+                    "source_offsets": build_breaker_source_offsets(
+                        4,
+                        final_spec["offsets"],
+                        worker_a_spec["offsets"],
+                        worker_b_spec["offsets"],
+                        lane_breaker_spec["source_offset"],
+                        jump_breaker_spec["source_offset"],
+                    ),
+                    "control_offset": final_spec["offsets"][1],
+                    "partner_offset": (
+                        (braid_breaker_spec["partner_offset"] if braid_breaker_spec["enabled"] else worker_a_spec["control_offset"])
+                        + (swap_breaker_spec["partner_offset"] if swap_breaker_spec["enabled"] else worker_b_spec["control_offset"])
+                    ),
+                    "mask_flat_offset": (
+                        lane_breaker_spec["mask_flat_offset"]
+                        + jump_breaker_spec["mask_flat_offset"]
+                        + swap_breaker_spec["salt_offset"] * 17
+                    ) % MASK_STACK_TOTAL_BYTES,
+                    "key_row": (
+                        worker_a_spec["key_row"]
+                        + worker_b_spec["key_row"]
+                        + final_spec["template"]
+                    ) % ROUND_KEY_STACK_DEPTH,
+                    "key_offset": (
+                        worker_a_spec["key_offset"]
+                        + jump_breaker_spec["key_offset"]
+                        + final_spec["template"] * 3
+                    ) % ROUND_KEY_BYTES,
+                    "salt_offset": (
+                        worker_a_spec["salt_offset"]
+                        + worker_b_spec["salt_offset"]
+                        + swap_breaker_spec["salt_offset"]
+                        + lane_breaker_spec["partner_bias"]
+                    ) % SALT_BYTES,
+                    "mixlane_a": (
+                        worker_a_spec["control_shift"]
+                        + braid_breaker_spec["mode_count"]
+                        + final_spec["template"]
+                    ) % 16,
+                    "mixlane_b": (
+                        worker_b_spec["control_shift"]
+                        + jump_breaker_spec["mode_count"]
+                        + swap_breaker_spec["mode_count"]
+                        + 5
+                    ) % 16,
+                    "fast_rule": (
+                        worker_a_spec["template"] * 19
+                        + worker_b_spec["template"] * 23
+                        + final_spec["template"] * 29
+                        + enabled_total * 31
+                    ) & 0xFF,
+                    "slow_rule": (
+                        lane_breaker_spec["mode_count"] * 17
+                        + braid_breaker_spec["chunk_span"]
+                        + jump_breaker_spec["section_bytes"]
+                        + swap_breaker_spec["chunk_span"]
+                    ) & 0xFF,
+                    "index_mode": (
+                        worker_a_spec["data_index_count"]
+                        + worker_b_spec["data_index_count"]
+                        + enabled_total
+                    ) & 0x0F,
+                    "emit_mode": final_spec["template"] & 0x01,
+                    "source_mix_variant": (
+                        worker_a_spec["template"]
+                        + worker_b_spec["template"]
+                        + enabled_total
+                    ) & 0x03,
+                    "lane_mix_variant_a": (
+                        braid_breaker_spec["mode_count"]
+                        + worker_a_spec["data_index_count"]
+                        + final_spec["template"]
+                    ) & 0x03,
+                    "lane_mix_variant_b": (
+                        jump_breaker_spec["mode_count"]
+                        + worker_b_spec["data_index_count"]
+                        + swap_breaker_spec["mode_count"]
+                    ) & 0x03,
+                    "inject_mode": (
+                        worker_a_spec["template"]
+                        + worker_b_spec["template"]
+                        + enabled_total
+                    ) & 0x03,
+                    "matrix_mode": (
+                        final_spec["template"]
+                        + worker_a_spec["data_index_count"]
+                        + worker_b_spec["data_index_count"]
+                        + enabled_total
+                    ) & 0x03,
+                },
+            )
+        )
+
+    return recipes[:3]
 
 
 def render_matrix_dispatch_switch(
@@ -3880,24 +4462,22 @@ def render_lightning_pass_lines(spec: dict[str, Any]) -> list[str]:
     )
     lines.extend(
         [
-            "    std::array<std::uint8_t, kMatrixBlockBytes> storm_store{};",
-            "    std::array<std::uint8_t, kMatrixBlockBytes> storm_emit{};",
-            "    storm.Store(storm_store.data());",
+            "    storm.Store(pBreakerTempA);",
             "    for (std::size_t aLane = 0; aLane < kMatrixBlockBytes; ++aLane) {",
         ]
     )
     if spec["emit_mix"] == "xor":
         lines.append(
-            "      storm_emit[aLane] = static_cast<std::uint8_t>(storm_store[aLane] ^ storm_control[(aLane + 3U) & 15U] ^ storm_mask_a[(aLane + 5U) & 15U] ^ storm_mask_b[(aLane + 9U) & 15U] ^ pSalt[(aLane + 7U) & 31U]);"
+            "      pBreakerTempB[aLane] = static_cast<std::uint8_t>(pBreakerTempA[aLane] ^ storm_control[(aLane + 3U) & 15U] ^ storm_mask_a[(aLane + 5U) & 15U] ^ storm_mask_b[(aLane + 9U) & 15U] ^ pSalt[(aLane + 7U) & 31U]);"
         )
     else:
         lines.append(
-            "      storm_emit[aLane] = static_cast<std::uint8_t>(storm_store[aLane] + storm_control[(aLane + 3U) & 15U] + storm_mask_a[(aLane + 5U) & 15U] + storm_mask_b[(aLane + 9U) & 15U] + pSalt[(aLane + 7U) & 31U]);"
+            "      pBreakerTempB[aLane] = static_cast<std::uint8_t>(pBreakerTempA[aLane] + storm_control[(aLane + 3U) & 15U] + storm_mask_a[(aLane + 5U) & 15U] + storm_mask_b[(aLane + 9U) & 15U] + pSalt[(aLane + 7U) & 31U]);"
         )
     lines.extend(
         [
             "    }",
-            f"    StoreBlock16Contiguous({source_cpp}, chunk, storm_emit);",
+            f"    std::memcpy({source_cpp} + chunk, pBreakerTempB, kMatrixBlockBytes);",
             "  }",
         ]
     )
@@ -3949,27 +4529,19 @@ def render_hurricane_pass_lines(spec: dict[str, Any]) -> list[str]:
     )
     lines.extend(
         [
-            "    std::array<std::uint8_t, kHurricaneBlockBytes> storm_store{};",
-            "    std::array<std::uint8_t, kHurricaneBlockBytes> storm_emit{};",
-            "    storm.Store(storm_store.data());",
+            f"    storm.Store({source_cpp} + chunk);",
             "    for (std::size_t aLane = 0; aLane < kHurricaneBlockBytes; ++aLane) {",
         ]
     )
     if spec["emit_mix"] == "xor":
         lines.append(
-            "      storm_emit[aLane] = static_cast<std::uint8_t>(storm_store[aLane] ^ storm_control[(aLane + 11U) & 255U] ^ storm_mask_a[(aLane + 17U) & 255U] ^ storm_mask_b[(aLane + 29U) & 255U] ^ pSalt[aLane & 31U]);"
+            f"      {source_cpp}[chunk + aLane] = static_cast<std::uint8_t>({source_cpp}[chunk + aLane] ^ storm_control[(aLane + 11U) & 255U] ^ storm_mask_a[(aLane + 17U) & 255U] ^ storm_mask_b[(aLane + 29U) & 255U] ^ pSalt[aLane & 31U]);"
         )
     else:
         lines.append(
-            "      storm_emit[aLane] = static_cast<std::uint8_t>(storm_store[aLane] + storm_control[(aLane + 11U) & 255U] + storm_mask_a[(aLane + 17U) & 255U] + storm_mask_b[(aLane + 29U) & 255U] + pSalt[aLane & 31U]);"
+            f"      {source_cpp}[chunk + aLane] = static_cast<std::uint8_t>({source_cpp}[chunk + aLane] + storm_control[(aLane + 11U) & 255U] + storm_mask_a[(aLane + 17U) & 255U] + storm_mask_b[(aLane + 29U) & 255U] + pSalt[aLane & 31U]);"
         )
-    lines.extend(
-        [
-            "    }",
-            f"    StoreBlock256Contiguous({source_cpp}, chunk, storm_emit);",
-            "  }",
-        ]
-    )
+    lines.extend(["    }", "  }"])
     return lines
 
 
@@ -4018,27 +4590,19 @@ def render_typhoon_pass_lines(spec: dict[str, Any]) -> list[str]:
     )
     lines.extend(
         [
-            "    std::array<std::uint8_t, kTyphoonBlockBytes> storm_store{};",
-            "    std::array<std::uint8_t, kTyphoonBlockBytes> storm_emit{};",
-            "    storm.Store(storm_store.data());",
+            f"    storm.Store({source_cpp} + chunk);",
             "    for (std::size_t aLane = 0; aLane < kTyphoonBlockBytes; ++aLane) {",
         ]
     )
     if spec["emit_mix"] == "xor":
         lines.append(
-            "      storm_emit[aLane] = static_cast<std::uint8_t>(storm_store[aLane] ^ storm_control[(aLane + 7U) & 127U] ^ storm_mask_a[(aLane + 13U) & 127U] ^ storm_mask_b[(aLane + 27U) & 127U] ^ pSalt[(aLane + 19U) & 31U]);"
+            f"      {source_cpp}[chunk + aLane] = static_cast<std::uint8_t>({source_cpp}[chunk + aLane] ^ storm_control[(aLane + 7U) & 127U] ^ storm_mask_a[(aLane + 13U) & 127U] ^ storm_mask_b[(aLane + 27U) & 127U] ^ pSalt[(aLane + 19U) & 31U]);"
         )
     else:
         lines.append(
-            "      storm_emit[aLane] = static_cast<std::uint8_t>(storm_store[aLane] + storm_control[(aLane + 7U) & 127U] + storm_mask_a[(aLane + 13U) & 127U] + storm_mask_b[(aLane + 27U) & 127U] + pSalt[(aLane + 19U) & 31U]);"
+            f"      {source_cpp}[chunk + aLane] = static_cast<std::uint8_t>({source_cpp}[chunk + aLane] + storm_control[(aLane + 7U) & 127U] + storm_mask_a[(aLane + 13U) & 127U] + storm_mask_b[(aLane + 27U) & 127U] + pSalt[(aLane + 19U) & 31U]);"
         )
-    lines.extend(
-        [
-            "    }",
-            f"    StoreBlock128Contiguous({source_cpp}, chunk, storm_emit);",
-            "  }",
-        ]
-    )
+    lines.extend(["    }", "  }"])
     return lines
 
 
@@ -4097,30 +4661,30 @@ def render_round_key_update_lines_ferocious(spec: dict[str, Any]) -> list[str]:
         "  std::memset(pNextRoundKeyBuffer, 0, kRoundKeyBytes);",
         "  unsigned int aSourceIndex = 0U;",
         "  while (aSourceIndex < PASSWORD_EXPANDED_SIZE) {",
-        f"    const int idx0 = WrapRange(static_cast<int>(aSourceIndex * {spec['round_scan_stride_a']}u + ({offset0})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
-        f"    const int idx1 = WrapRange(static_cast<int>(aSourceIndex * {spec['round_scan_stride_b']}u + ({offset1})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
-        f"    const int idx2 = WrapRange(static_cast<int>(aSourceIndex * {spec['round_scan_stride_c']}u + ({offset2})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
+        f"    const int aIndex0 = WrapRange(static_cast<int>(aSourceIndex * {spec['round_scan_stride_a']}u + ({offset0})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
+        f"    const int aIndex1 = WrapRange(static_cast<int>(aSourceIndex * {spec['round_scan_stride_b']}u + ({offset1})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
+        f"    const int aIndex2 = WrapRange(static_cast<int>(aSourceIndex * {spec['round_scan_stride_c']}u + ({offset2})), 0, static_cast<int>(PASSWORD_EXPANDED_SIZE));",
         f"    const unsigned int aKeyIndex = (aSourceIndex * {spec['round_scan_stride_a']}u + static_cast<unsigned int>({spec['round_key_rotate']}u)) & 31U;",
         f"    const unsigned int aKeyIndex2 = (aKeyIndex + static_cast<unsigned int>({spec['round_key_spread']}u)) & 31U;",
-        "    const std::uint32_t a = static_cast<std::uint32_t>(pDest[idx0]);",
-        "    const std::uint32_t b = static_cast<std::uint32_t>(pDest[idx1]);",
-        "    const std::uint32_t c = static_cast<std::uint32_t>(pDest[idx2]);",
-        "    const std::uint32_t salt_byte = static_cast<std::uint32_t>(pSalt[aSourceIndex & 31U]);",
+        "    const std::uint32_t a = static_cast<std::uint32_t>(pDest[aIndex0]);",
+        "    const std::uint32_t b = static_cast<std::uint32_t>(pDest[aIndex1]);",
+        "    const std::uint32_t c = static_cast<std::uint32_t>(pDest[aIndex2]);",
+        "    const std::uint32_t aSaltByte = static_cast<std::uint32_t>(pSalt[aSourceIndex & 31U]);",
     ]
     if spec["round_mix_mode"] == "xor_add":
         lines.extend(
             [
-                "    const std::uint32_t mix_value = static_cast<std::uint32_t>(((a + b) ^ c ^ salt_byte) & 0xFFu);",
-                "    pNextRoundKeyBuffer[aKeyIndex] ^= static_cast<unsigned char>(mix_value);",
-                "    pNextRoundKeyBuffer[aKeyIndex2] ^= static_cast<unsigned char>((b + c + salt_byte) & 0xFFu);",
+                "    const std::uint32_t aMixValue = static_cast<std::uint32_t>(((a + b) ^ c ^ aSaltByte) & 0xFFu);",
+                "    pNextRoundKeyBuffer[aKeyIndex] ^= static_cast<unsigned char>(aMixValue);",
+                "    pNextRoundKeyBuffer[aKeyIndex2] ^= static_cast<unsigned char>((b + c + aSaltByte) & 0xFFu);",
             ]
         )
     else:
         lines.extend(
             [
-                "    const std::uint32_t mix_value = static_cast<std::uint32_t>(((a ^ b) + c + salt_byte) & 0xFFu);",
-                "    pNextRoundKeyBuffer[aKeyIndex] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex] + static_cast<unsigned char>(mix_value));",
-                "    pNextRoundKeyBuffer[aKeyIndex2] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex2] + static_cast<unsigned char>((b ^ c ^ salt_byte) & 0xFFu));",
+                "    const std::uint32_t aMixValue = static_cast<std::uint32_t>(((a ^ b) + c + aSaltByte) & 0xFFu);",
+                "    pNextRoundKeyBuffer[aKeyIndex] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex] + static_cast<unsigned char>(aMixValue));",
+                "    pNextRoundKeyBuffer[aKeyIndex2] = static_cast<unsigned char>(pNextRoundKeyBuffer[aKeyIndex2] + static_cast<unsigned char>((b ^ c ^ aSaltByte) & 0xFFu));",
             ]
         )
     lines.extend(["    ++aSourceIndex;", "  }", "  RotateKeyStack(pKeyStack, pNextRoundKeyBuffer);"])
@@ -4186,13 +4750,13 @@ def render_horrid_candidate_verbose(
             f"  workerB_loop: idx={loop_b_spec['data_index_count']} template={loop_b_spec['template']} offs={loop_b_spec['offsets']} reverse={loop_b_spec['reverse_modes']}",
             f"  twiddle_loop1: mode={loop1_twiddle_spec['mix_mode']} pos={loop1_twiddle_spec['position_mode']} rot={loop1_twiddle_spec['rotate']}",
             f"  twiddle_loop2: mode={loop2_twiddle_spec['mix_mode']} pos={loop2_twiddle_spec['position_mode']} rot={loop2_twiddle_spec['rotate']} shared={'aTwiddleA' if loop2_uses_twiddle_a else 'aTwiddleB'}",
-            f"  lane_breaker: enabled={str(lane_breaker_spec['enabled']).lower()} source_off={lane_breaker_spec['source_offset']} mask_off={lane_breaker_spec['mask_flat_offset']} partner_bias={lane_breaker_spec['partner_bias']}",
-            f"  braid_breaker: enabled={str(braid_breaker_spec['enabled']).lower()} source_off={braid_breaker_spec['source_offset']} partner_off={braid_breaker_spec['partner_offset']} chunk_span={braid_breaker_spec['chunk_span']}",
-            f"  jump_breaker: enabled={str(jump_breaker_spec['enabled']).lower()} source_off={jump_breaker_spec['source_offset']} partner_off={jump_breaker_spec['partner_offset']} stride={jump_breaker_spec['jump_stride']} span={jump_breaker_spec['section_bytes']} mask_off={jump_breaker_spec['mask_flat_offset']}",
-            f"  swap_breaker: enabled={str(swap_breaker_spec['enabled']).lower()} source_off={swap_breaker_spec['source_offset']} partner_off={swap_breaker_spec['partner_offset']} chunk_span={swap_breaker_spec['chunk_span']}",
+            f"  lane_breaker: enabled={str(lane_breaker_spec['enabled']).lower()} flavor={lane_breaker_spec['flavor']} source_off={lane_breaker_spec['source_offset']} mask_off={lane_breaker_spec['mask_flat_offset']} partner_bias={lane_breaker_spec['partner_bias']}",
+            f"  braid_breaker: enabled={str(braid_breaker_spec['enabled']).lower()} flavor={braid_breaker_spec['flavor']} source_off={braid_breaker_spec['source_offset']} partner_off={braid_breaker_spec['partner_offset']} chunk_span={braid_breaker_spec['chunk_span']}",
+            f"  jump_breaker: enabled={str(jump_breaker_spec['enabled']).lower()} flavor={jump_breaker_spec['flavor']} source_off={jump_breaker_spec['source_offset']} partner_off={jump_breaker_spec['partner_offset']} stride={jump_breaker_spec['jump_stride']} span={jump_breaker_spec['section_bytes']} mask_off={jump_breaker_spec['mask_flat_offset']}",
+            f"  swap_breaker: enabled={str(swap_breaker_spec['enabled']).lower()} flavor={swap_breaker_spec['flavor']} source_off={swap_breaker_spec['source_offset']} partner_off={swap_breaker_spec['partner_offset']} chunk_span={swap_breaker_spec['chunk_span']}",
             f"  mask_phase: chosen={mask_phase_spec['chosen_worker']} other={mask_phase_spec['other_worker']} offs={mask_phase_spec['offsets']} template={mask_phase_spec['template']}",
-            f"  mask_seed_a: worker={mask_schedule_spec_a['worker_mode']} reverse={mask_schedule_spec_a['seed_reverse_modes']}/{mask_schedule_spec_a['second_reverse_modes']}",
-            f"  mask_seed_b: worker={mask_schedule_spec_b['worker_mode']} reverse={mask_schedule_spec_b['seed_reverse_modes']}/{mask_schedule_spec_b['second_reverse_modes']}",
+            f"  mask_seed_a: worker={mask_schedule_spec_a['worker_mode']} loop_reverse={mask_schedule_spec_a['seed_loop_reverse']}/{mask_schedule_spec_a['second_loop_reverse']} reverse={mask_schedule_spec_a['seed_reverse_modes']}/{mask_schedule_spec_a['second_reverse_modes']}",
+            f"  mask_seed_b: worker={mask_schedule_spec_b['worker_mode']} loop_reverse={mask_schedule_spec_b['seed_loop_reverse']}/{mask_schedule_spec_b['second_loop_reverse']} reverse={mask_schedule_spec_b['seed_reverse_modes']}/{mask_schedule_spec_b['second_reverse_modes']}",
             f"  lightning: enabled={str(lightning_spec['enabled']).lower()} source={lightning_spec['source_buffer']} control={lightning_spec['control_buffer']} fast={list(lightning_spec['fast_pool'])} slow={list(lightning_spec['slow_pool'])} skip={lightning_spec['fast_skip_mod']}/{lightning_spec['slow_skip_mod']} mix_variant={lightning_spec['mix_variant']}",
             f"  typhoon: enabled={str(typhoon_spec['enabled']).lower()} source={typhoon_spec['source_buffer']} control={typhoon_spec['control_buffer']} fast={list(typhoon_spec['fast_pool'])} slow={list(typhoon_spec['slow_pool'])} skip={typhoon_spec['fast_skip_mod']}/{typhoon_spec['slow_skip_mod']}",
             f"  hurricane: enabled={str(hurricane_spec['enabled']).lower()} source={hurricane_spec['source_buffer']} control={hurricane_spec['control_buffer']} fast={list(hurricane_spec['fast_pool'])} slow={list(hurricane_spec['slow_pool'])} skip={hurricane_spec['fast_skip_mod']}/{hurricane_spec['slow_skip_mod']}",
@@ -4308,17 +4872,17 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
         f"breaker_shapes={breaker_shape_summary}; "
         f"wa_rev={worker_a_spec['reverse_modes']}; "
         f"wb_rev={worker_b_spec['reverse_modes']}; "
-        f"lane={'on' if lane_breaker_spec['enabled'] else 'off'}; "
-        f"braid={'on' if braid_breaker_spec['enabled'] else 'off'}; "
-        f"jump={'on' if jump_breaker_spec['enabled'] else 'off'}; "
-        f"swap={'on' if swap_breaker_spec['enabled'] else 'off'}; "
+        f"lane={'on' if lane_breaker_spec['enabled'] else 'off'}:{lane_breaker_spec['flavor']}; "
+        f"braid={'on' if braid_breaker_spec['enabled'] else 'off'}:{braid_breaker_spec['flavor']}; "
+        f"jump={'on' if jump_breaker_spec['enabled'] else 'off'}:{jump_breaker_spec['flavor']}; "
+        f"swap={'on' if swap_breaker_spec['enabled'] else 'off'}:{swap_breaker_spec['flavor']}; "
         f"mask={mask_phase_spec['chosen_worker']}x{mask_phase_spec['template']}; "
         f"lightning={'on' if lightning_spec['enabled'] else 'off'}:{lightning_spec['mix_variant']}; "
         f"typhoon={'on' if typhoon_spec['enabled'] else 'off'}; "
         f"hurricane={'on' if hurricane_spec['enabled'] else 'off'}; "
         f"final={final_spec['template']}/{final_spec['reverse_modes']}; "
         f"key_rot={key_schedule_spec['round_key_rotate']}; "
-        f"maskA_seed={mask_schedule_spec_a['worker_mode']}; "
+        f"maskA_seed={mask_schedule_spec_a['worker_mode']}/{mask_schedule_spec_a['seed_loop_reverse']}; "
         f"maskB_seed={mask_schedule_spec_b['worker_mode']}; "
         f"maskA_bias={mask_schedule_spec_a['round_bias']}; "
         f"maskB_bias={mask_schedule_spec_b['round_bias']}]"
@@ -4369,16 +4933,29 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
             f"final_reverse={final_spec['reverse_modes']}"
         ),
         f"// {recipe_summary}",
-        f"static void {function_name}_SaltSeed(",
-        "    unsigned char* pSource,",
-        "    unsigned char (&pSalt)[kSaltBytes],",
-        "    unsigned int pLength) {",
-        "  if (pSource == nullptr || pLength < PASSWORD_EXPANDED_SIZE) {",
-        "    return;",
-        "  }",
     ]
+    function_lines.extend(render_custom_twiddle_and_salt_mix_lines(function_name, candidate_id, key_schedule_spec))
+    function_lines.append("")
+    function_lines.extend(
+        [
+            f"static void {function_name}_SaltSeed(",
+            "    unsigned char* pSource,",
+            "    unsigned char (&pSalt)[kSaltBytes],",
+            "    unsigned int pLength) {",
+            "  if (pSource == nullptr || pLength < PASSWORD_EXPANDED_SIZE) {",
+            "    return;",
+            "  }",
+        ]
+    )
     function_lines.extend(render_named_mix_box_lines(salt_mix_box_values, "aSaltMixBox"))
-    function_lines.extend(render_salt_seed_lines(key_schedule_spec, "pSalt", "aSaltMixBox"))
+    function_lines.extend(
+        render_salt_seed_lines(
+            key_schedule_spec,
+            "pSalt",
+            "aSaltMixBox",
+            f"{function_name}_ApplySaltMixBox",
+        )
+    )
     function_lines.append("}")
     function_lines.append("")
     function_lines.extend(
@@ -4432,6 +5009,10 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
     function_lines.append("")
     function_lines.extend(render_custom_final_whitening_lines(function_name, final_whitening_spec))
     function_lines.append("")
+    function_lines.extend(render_custom_dual_worker_matrix_breaker_lines(function_name, candidate_id))
+    function_lines.append("")
+    function_lines.extend(render_custom_step_mix_pulse_lines(function_name, candidate_id, key_schedule_spec))
+    function_lines.append("")
     function_lines.extend(
         [
         f"static void {function_name}_TwistBlock(",
@@ -4439,6 +5020,8 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
         "    unsigned char* pWorkerA,",
         "    unsigned char* pWorkerB,",
         "    unsigned char* pDest,",
+        "    unsigned char (&pBreakerTempA)[kMatrixBlockBytes],",
+        "    unsigned char (&pBreakerTempB)[kMatrixBlockBytes],",
         "    unsigned int pRound,",
         "    const unsigned char (&pSalt)[kSaltBytes],",
         "    unsigned char (&pKeyStack)[kRoundKeyStackDepth][kRoundKeyBytes],",
@@ -4469,7 +5052,7 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
     function_lines.append(f"  {function_name}_TsunamiBreaker(pSource, pWorkerA, pWorkerB, pSalt, pRound, aTwiddleA, aTwiddleB);")
     function_lines.append("")
     for recipe_name, recipe in breaker_recipes:
-        function_lines.extend(render_dual_worker_matrix_breaker_lines(recipe_name, recipe))
+        function_lines.extend(render_dual_worker_matrix_breaker_lines(function_name, recipe_name, recipe))
         function_lines.append("")
     function_lines.extend(render_mask_phase_lines(mask_phase_spec))
     function_lines.append("")
@@ -4482,6 +5065,8 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
     if hurricane_spec["enabled"]:
         function_lines.extend(render_hurricane_pass_lines(hurricane_spec))
         function_lines.append("")
+    function_lines.append(f"  {function_name}_ApplyStepMixPulse(pSource, pWorkerA, pWorkerB, pSalt, pRound, pBreakerTempA, pBreakerTempB);")
+    function_lines.append("")
     function_lines.extend(render_final_weave_lines(final_spec))
     function_lines.append(f"  {function_name}_FinalWhitening(pSource, pDest, pSalt, pRound, aTwiddleA, aTwiddleB);")
     function_lines.append("")
@@ -4556,6 +5141,8 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
         "    return;",
         "  }",
         "  unsigned char aSalt[kSaltBytes]{};",
+        "  unsigned char aBreakerTempA[kMatrixBlockBytes]{};",
+        "  unsigned char aBreakerTempB[kMatrixBlockBytes]{};",
         f"  {function_name}_SaltSeed(pSource, aSalt, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
         f"  {function_name}_KeySeed(pSource, pKeyStack, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
         f"  {function_name}_MaskSeedA(pSource, pWorkerA, pMaskStackA, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
@@ -4566,7 +5153,7 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
         "        ? pSource",
         "        : (pDest + offset - PASSWORD_EXPANDED_SIZE);",
         "    unsigned char* aRoundDest = pDest + offset;",
-        f"    {function_name}_TwistBlock(aRoundSource, pWorkerA, pWorkerB, aRoundDest, aRound, aSalt, pKeyStack, pMaskStackA, pMaskStackB, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
+        f"    {function_name}_TwistBlock(aRoundSource, pWorkerA, pWorkerB, aRoundDest, aBreakerTempA, aBreakerTempB, aRound, aSalt, pKeyStack, pMaskStackA, pMaskStackB, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
         f"    {function_name}_PushKeyRound(aRoundDest, aSalt, pKeyStack, pNextRoundKeyBuffer, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
         f"    {function_name}_PushMaskRoundA(aRoundDest, pMaskStackA, pMaskStackB, pNextRoundMaskBufferA, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
         f"    {function_name}_PushMaskRoundB(aRoundDest, pMaskStackB, pMaskStackA, pNextRoundMaskBufferB, static_cast<unsigned int>(PASSWORD_EXPANDED_SIZE));",
@@ -4613,7 +5200,9 @@ def build_matrix_candidate(rng: random.Random, candidate_id: int) -> CandidateSp
             + f"\n  salt_mix_box: {mix_box_signature(salt_mix_box_values)}"
             + f"\n  tsunami_mix_box: {mix_box_signature(tsunami_spec['mix_box'])}"
             + f"\n  final_mix_box: {mix_box_signature(final_whitening_spec['mix_box'])}"
-            + "\n  salt_sbox: enabled=true"
+            + "\n  salt_mix_layer: custom_per_candidate"
+            + "\n  dual_worker_breaker: custom_recipe4_per_candidate"
+            + "\n  step_mix_pulse: custom_gradient_tripwire"
             + "\n  tsunami: custom_per_candidate"
             + "\n  final_whitening: custom_per_candidate"
             + "\n  lightning_mix_columns: enabled=true"
@@ -5000,6 +5589,7 @@ def render_top_cpp(
     pieces = [
         "#include \"HurricaneMatrix.hpp\"",
         "#include \"LightningMatrix.hpp\"",
+        "#include \"TwistBreakers.hpp\"",
         "#include \"TyphoonMatrix.hpp\"",
         "#include \"TwistTypes.hpp\"",
         "",
@@ -5102,14 +5692,15 @@ def command_generate(args: argparse.Namespace) -> int:
 
             generated_count += 1
 
-    write_generated_cpp_from_parts(
-        cpp_path,
-        functions_temp_path,
-        registry_temp_path,
-        seed,
-        generated_count,
-        verbose=False,
-    )
+    if not args.skip_plain_cpp:
+        write_generated_cpp_from_parts(
+            cpp_path,
+            functions_temp_path,
+            registry_temp_path,
+            seed,
+            generated_count,
+            verbose=False,
+        )
     write_generated_cpp_from_parts(
         verbose_cpp_path,
         functions_temp_path,
@@ -5118,19 +5709,30 @@ def command_generate(args: argparse.Namespace) -> int:
         generated_count,
         verbose=True,
     )
-    write_verbose_text_from_parts(verbose_txt_path, verbose_temp_path, seed, generated_count)
-    write_manifest_from_parts(manifest_path, manifest_items_temp_path, generated_count, seed)
+    if not args.skip_verbose_txt:
+        write_verbose_text_from_parts(verbose_txt_path, verbose_temp_path, seed, generated_count)
+    if not args.skip_manifest:
+        write_manifest_from_parts(manifest_path, manifest_items_temp_path, generated_count, seed)
     shutil.rmtree(temp_dir)
 
     print(f"generated {generated_count} candidates with seed={seed}")
     if stopped_early and generated_count < args.count:
         print("stopped early after exhausting new unique shapes under current generator rules")
     print(f"baselines: {len(BASELINE_CANDIDATES)}")
-    print(f"total_manifest_candidates: {generated_count + len(BASELINE_CANDIDATES)}")
-    print(f"manifest: {manifest_path}")
-    print(f"cpp: {cpp_path}")
+    if not args.skip_manifest:
+        print(f"total_manifest_candidates: {generated_count + len(BASELINE_CANDIDATES)}")
+        print(f"manifest: {manifest_path}")
+    else:
+        print("manifest: skipped")
+    if not args.skip_plain_cpp:
+        print(f"cpp: {cpp_path}")
+    else:
+        print("cpp: skipped")
     print(f"verbose_cpp: {verbose_cpp_path}")
-    print(f"verbose_txt: {verbose_txt_path}")
+    if not args.skip_verbose_txt:
+        print(f"verbose_txt: {verbose_txt_path}")
+    else:
+        print("verbose_txt: skipped")
     return 0
 
 
@@ -5232,6 +5834,9 @@ def build_parser() -> argparse.ArgumentParser:
     generate_parser.add_argument("--count", type=int, default=DEFAULT_COUNT)
     generate_parser.add_argument("--seed", type=int)
     generate_parser.add_argument("--output-dir", default="generated")
+    generate_parser.add_argument("--skip-plain-cpp", action="store_true")
+    generate_parser.add_argument("--skip-verbose-txt", action="store_true")
+    generate_parser.add_argument("--skip-manifest", action="store_true")
     generate_parser.set_defaults(func=command_generate)
 
     export_parser = subparsers.add_parser("export-top", help="emit top-ranked candidate functions")

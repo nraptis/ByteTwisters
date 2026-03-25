@@ -1,0 +1,32 @@
+input_cpp=/Users/magneto/Desktop/Codex Playground/Twist/generated/shards_cpp/shard_0003.cpp
+candidate_id=18354
+password_text=uv
+stream_bytes=261120
+stream_file=/Users/magneto/Desktop/Codex Playground/Twist/alphabet_passers_work/candidates/candidate_0018353/uv.bin
+practrand_bin=/Users/magneto/Desktop/Codex Playground/Twist/build/practrand/RNG_test
+report_file=/Users/magneto/Desktop/Codex Playground/Twist/alphabet_passers_work/candidates/candidate_0018353/.practrand_reports/candidate_0018353_uv_034BLK/practrand_output.txt
+fail=0
+very_suspicious=2
+suspicious=0
+mildly_suspicious=2
+unusual=3
+normalish=0
+normal=39
+total_results=46
+
+RNG_test using PractRand version 0.96
+RNG = RNG_stdin8, seed = unknown
+test set = core, folding = standard (8 bit)
+
+rng=RNG_stdin8, seed=unknown
+length= 255.000 kilobytes (2^17.994 bytes), time= 0.0 seconds
+  Test Name                         Raw       Processed     Evaluation       
+  BCFN(2+0,13-8U)                   R= +15.5  p =  6.8e-5   mildly suspicious
+  BCFN(2+1,13-8U)                   R= +13.9  p =  1.7e-4   unusual          
+  BCFN(2+2,13-9U)                   R= +12.7  p =  5.9e-4   unusual          
+  BCFN(2+3,13-9U)                   R= +14.1  p =  2.6e-4   unusual          
+  BCFN(2+4,13-9U)                   R= +27.5  p =  2.5e-7   very suspicious  
+  FPF/16:cross                      R=  +9.9  p =  1.0e-7   very suspicious  
+  [Low1/8]BCFN(2+0,13-9U)           R= +18.7  p =  2.4e-5   mildly suspicious
+  ...and 39 test result(s) without anomalies
+

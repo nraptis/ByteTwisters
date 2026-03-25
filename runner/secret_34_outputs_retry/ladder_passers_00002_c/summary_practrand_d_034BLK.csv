@@ -1,2 +1,0 @@
-folder_name,candidate_id,function_name,status,gate_status,fail,very_suspicious,suspicious,mildly_suspicious,unusual,normalish,normal,total_results,score_file,stream_file,report_file
-candidate_0022159,22160,TwistCandidate_22160,REPORT,TOO_MANY_FAIL,4,3,0,0,5,0,34,46,secret_34_outputs_retry/ladder_passers_00002_c/candidate_0022159/scores_practrand_d_034BLK.txt,secret_34_outputs_retry/ladder_passers_00002_c/candidate_0022159/d_byte_stream_034BLK.bin,secret_34_outputs_retry/ladder_passers_00002_c/candidate_0022159/practrand_d_034BLK.txt

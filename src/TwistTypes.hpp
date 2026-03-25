@@ -55,6 +55,8 @@ using TwistBlockFunction = void (*)(
     unsigned char* pWorkerA,
     unsigned char* pWorkerB,
     unsigned char* pDest,
+    unsigned char (&pBreakerTempA)[kMatrixBlockBytes],
+    unsigned char (&pBreakerTempB)[kMatrixBlockBytes],
     unsigned int pRound,
     const unsigned char (&pSalt)[kSaltBytes],
     unsigned char (&pKeyStack)[kRoundKeyStackDepth][kRoundKeyBytes],
@@ -136,7 +138,7 @@ inline unsigned char MaskSeedMixBoxByte(unsigned char value) {
   return kSBox[value];
 }
 
-inline unsigned char FixedSBoxByte(unsigned char value) {
+inline unsigned char FixedMixBoxByte(unsigned char value) {
   static constexpr unsigned char kSBox[256] = {
       0x63U, 0x7CU, 0x77U, 0x7BU, 0xF2U, 0x6BU, 0x6FU, 0xC5U, 0x30U, 0x01U, 0x67U, 0x2BU, 0xFEU, 0xD7U, 0xABU, 0x76U,
       0xCAU, 0x82U, 0xC9U, 0x7DU, 0xFAU, 0x59U, 0x47U, 0xF0U, 0xADU, 0xD4U, 0xA2U, 0xAFU, 0x9CU, 0xA4U, 0x72U, 0xC0U,

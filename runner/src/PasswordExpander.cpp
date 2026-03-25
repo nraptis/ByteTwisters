@@ -87,11 +87,15 @@ void PasswordExpander::TwistRegisteredCandidateBlock(
     std::abort();
   }
   if (pCandidate.twist_block != nullptr) {
+    unsigned char aBreakerTempA[twist::kMatrixBlockBytes]{};
+    unsigned char aBreakerTempB[twist::kMatrixBlockBytes]{};
     pCandidate.twist_block(
         pSource,
         pWorkerA,
         pWorkerB,
         pDestination,
+        aBreakerTempA,
+        aBreakerTempB,
         pRound,
         pSaltBuffer,
         pKeyBuffer,
@@ -103,9 +107,9 @@ void PasswordExpander::TwistRegisteredCandidateBlock(
   if (pCandidate.function == nullptr) {
     std::abort();
   }
-  unsigned char next_round_key[twist::kRoundKeyBytes]{};
-  unsigned char next_round_mask_a[twist::kMaskBytes]{};
-  unsigned char next_round_mask_b[twist::kMaskBytes]{};
+  unsigned char aNextRoundKey[twist::kRoundKeyBytes]{};
+  unsigned char aNextRoundMaskA[twist::kMaskBytes]{};
+  unsigned char aNextRoundMaskB[twist::kMaskBytes]{};
   pCandidate.function(
       pSource,
       pWorkerA,
@@ -114,9 +118,9 @@ void PasswordExpander::TwistRegisteredCandidateBlock(
       pKeyBuffer,
       pMaskBufferA,
       pMaskBufferB,
-      next_round_key,
-      next_round_mask_a,
-      next_round_mask_b,
+      aNextRoundKey,
+      aNextRoundMaskA,
+      aNextRoundMaskB,
       kBlockLength);
 }
 
@@ -183,17 +187,17 @@ void PasswordExpander::ExpandPassword(
 
   SeedRegisteredCandidate(pCandidate, pSource, pSaltBuffer, pKeyBuffer, pMaskBufferA, pMaskBufferB, kBlockLength);
 
-  unsigned int round = 0U;
-  for (unsigned int offset = 0U; offset < pLength; offset += kBlockLength, ++round) {
-    unsigned char* round_source = (round == 0U) ? pSource : (pDestination + offset - kBlockLength);
-    unsigned char* round_dest = pDestination + offset;
+  unsigned int aRound = 0U;
+  for (unsigned int aOffset = 0U; aOffset < pLength; aOffset += kBlockLength, ++aRound) {
+    unsigned char* aRoundSource = (aRound == 0U) ? pSource : (pDestination + aOffset - kBlockLength);
+    unsigned char* aRoundDest = pDestination + aOffset;
     TwistRegisteredCandidateBlock(
         pCandidate,
-        round_source,
+        aRoundSource,
         pWorkerA,
         pWorkerB,
-        round_dest,
-        round,
+        aRoundDest,
+        aRound,
         pSaltBuffer,
         pKeyBuffer,
         pMaskBufferA,
@@ -201,7 +205,7 @@ void PasswordExpander::ExpandPassword(
         kBlockLength);
     PushRegisteredCandidateRound(
         pCandidate,
-        round_dest,
+        aRoundDest,
         pSaltBuffer,
         pKeyBuffer,
         pMaskBufferA,

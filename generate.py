@@ -23,12 +23,19 @@ def main() -> int:
     parser.add_argument("--shard-size", type=int, default=500)
     parser.add_argument("--generated-dir", default="generated")
     parser.add_argument("--candidates-dir", default="generated/candidates")
+    parser.add_argument("--clean-generated", action="store_true")
     parser.add_argument("--clean-candidates", action="store_true")
     parser.add_argument("--skip-materialize", action="store_true")
+    parser.add_argument("--skip-plain-cpp", action="store_true")
+    parser.add_argument("--skip-verbose-report", action="store_true")
+    parser.add_argument("--skip-manifest", action="store_true")
+    parser.add_argument("--delete-verbose-cpp-after-split", action="store_true")
     args = parser.parse_args()
 
     generated_dir = ROOT / args.generated_dir
     candidates_dir = ROOT / args.candidates_dir
+    if args.clean_generated and generated_dir.exists():
+        shutil.rmtree(generated_dir)
     generated_dir.mkdir(parents=True, exist_ok=True)
 
     generate_cmd = [
@@ -42,6 +49,12 @@ def main() -> int:
     ]
     if args.seed is not None:
         generate_cmd.extend(["--seed", str(args.seed)])
+    if args.skip_plain_cpp:
+        generate_cmd.append("--skip-plain-cpp")
+    if args.skip_verbose_report:
+        generate_cmd.append("--skip-verbose-txt")
+    if args.skip_manifest:
+        generate_cmd.append("--skip-manifest")
     run(generate_cmd)
 
     run(
@@ -58,6 +71,11 @@ def main() -> int:
             str(generated_dir / "shards_index.json"),
         ]
     )
+
+    if args.delete_verbose_cpp_after_split:
+        verbose_cpp_path = generated_dir / "twist_candidates_generated_verbose.cpp"
+        if verbose_cpp_path.exists():
+            verbose_cpp_path.unlink()
 
     if not args.skip_materialize:
         if args.clean_candidates and candidates_dir.exists():
@@ -77,6 +95,10 @@ def main() -> int:
         print(f"candidate_folders={candidates_dir}")
     else:
         print("candidate_folders=skipped")
+
+    disk_usage = shutil.disk_usage(generated_dir)
+    print(f"generated_dir={generated_dir}")
+    print(f"free_space_bytes={disk_usage.free}")
     return 0
 
 

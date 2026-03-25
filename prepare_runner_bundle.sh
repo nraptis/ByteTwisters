@@ -13,6 +13,7 @@ script_files=(
   "34_ladder"
   "34_ladder.sh"
   "run_practrand_34blk_alphabet_gauntlet.sh"
+  "run_practrand_34blk_alphabet_gauntlet_extended.sh"
   "run_practrand_34blk_in_place.sh"
   "run_practrand_passwords_and_list.sh"
   "run_registered_candidate_practrand_once.sh"
@@ -66,6 +67,7 @@ chmod +x \
   "${RUNNER_DIR}/34_ladder" \
   "${RUNNER_DIR}/34_ladder.sh" \
   "${RUNNER_DIR}/run_practrand_34blk_alphabet_gauntlet.sh" \
+  "${RUNNER_DIR}/run_practrand_34blk_alphabet_gauntlet_extended.sh" \
   "${RUNNER_DIR}/run_practrand_34blk_in_place.sh" \
   "${RUNNER_DIR}/run_practrand_passwords_and_list.sh" \
   "${RUNNER_DIR}/run_registered_candidate_practrand_once.sh" \
@@ -83,6 +85,7 @@ Expected layout:
 - ./34_ladder
 - ./34_ladder_passwords.txt
 - ./run_practrand_34blk_alphabet_gauntlet.sh
+- ./run_practrand_34blk_alphabet_gauntlet_extended.sh
 - ./run_practrand_passwords_and_list.sh
 
 Typical run:
@@ -98,6 +101,11 @@ MAX_FAIL=0 MAX_VERY_SUSPICIOUS=1000 \
 ./run_practrand_34blk_alphabet_gauntlet.sh \
 ./practrand_a_34_passers \
 ./alphabet_gauntlet_34blk_passers
+
+Extended alphabet gauntlet:
+./run_practrand_34blk_alphabet_gauntlet_extended.sh \
+./practrand_a_34_passers \
+./alphabet_gauntlet_34blk_extended_passers
 
 Notes:
 - Metadata may still point at old absolute shard paths. The bundled tooling will
